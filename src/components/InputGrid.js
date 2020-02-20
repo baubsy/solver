@@ -9,7 +9,7 @@ class InputGrid extends React.Component {
   //var stateArray = this.arrayBuilder('answer');
   state = {inputGrid : this.arrayBuilder('answer'), posArray : this.arrayBuilder()};
 
-
+  //first approach, not used
   gridBuilder(){
     const gridSize = 9;
     let grid = [];
@@ -31,17 +31,46 @@ class InputGrid extends React.Component {
     return grid;
   };
 
+  compArrayBuilder(type, id, grid){
+    //id being the row/col/square ID, 0-8
+    //using 81 for grid size for now
+    var compArray = [];
+
+    if (type === 'col'){
+      for(var i = 0; i < 81; i++){
+        if(grid[i].col === id){
+          compArray.push(grid[i]);
+        }
+      }
+    }
+    if (type === 'row'){
+      for(var i = 0; i < 81; i++){
+        if(grid[i].row === id){
+          compArray.push(grid[i]);
+        }
+      }
+    }
+    if (type === 'square'){
+      for(var i = 0; i < 81; i++){
+        if(grid[i].square === id){
+          compArray.push(grid[i]);
+        }
+      }
+    }
+
+    return compArray;
+  }
   arrayBuilder(type){
     var posArray = [];
     //builds the structure of the array
     //81 squares in a sudoku grid, 9x9, indexed from top left to bottom right starting from zero
     if(type === 'answer'){
       for(var k = 0; k < 81; k++){
-        posArray.push({row: null,col: null,square: null, answer: ''});
+        posArray.push({id: k, row: null,col: null,square: null, answer: ''});
       };
     } else {
       for(var d = 0; d < 81; d++){
-        posArray.push({row: null,col: null,square: null, possi: [1,2,3,4,5,6,7,8,9]}) //DEBUG value remove!
+        posArray.push({id: d, row: null,col: null,square: null, possi: [1,2,3,4,5,6,7,8,9], solved: false}) //DEBUG value remove!
       }
     }
 
@@ -102,8 +131,8 @@ class InputGrid extends React.Component {
     return posArray;
   };
 
-  gridSolve(grid, posArray){
-    var posGrid = posArray;
+  gridSolve(grid, posState){
+    var posGrid = posState;
     var newGrid = grid;
 
     var gridSize = Object.keys(grid).length;
@@ -116,65 +145,102 @@ class InputGrid extends React.Component {
      
       
     for(var i= 0; i < gridSize; i++){
-      if(grid[i].answer !== ''){
-        //butchering possi array, 
-        var arrayInserter = [grid[i].answer];
-        console.log(arrayInserter);
-        posGrid[i].possi = arrayInserter;
-        console.log(posGrid[i].possi);
+      if(newGrid[i].answer != ''){
+        posGrid[i].solved = true;
       }
-      if(posGrid[i].possi.length === 1){
+      if(posGrid[i].possi.length === 1 && posGrid[i].solved === false){
+        //console.log('iftest2');
         newGrid[i].answer = posGrid[i].possi[0];
+        posGrid[i].solved = true;
+        //console.log(newGrid);
+        //console.log(posGrid);
       }
     }  
-
+    //console.log('grid post array insertion')
+    //console.log(posGrid);
     //comparing each grid element to each other
+    console.log(newGrid);
     for(var j= 0; j< gridSize; j++){
-      if(grid[j].answer != ''){
+      if(newGrid[j].answer != ''){
         for(var k = 0; k< gridSize; k++){
-        if(grid[j].col == grid[k].col || grid[j].row == grid[k].row || grid[j].square == grid[k].square)
-        
-        /*!!!!!!!!!!!!!!
-
-            //not removing the right element!
-        !!!!!!!!!!!!!!!*/
-          posGrid[k].possi.splice(posGrid[k].possi.indexOf(grid[j].answer), 1);
+          //reduces possibility array elements
+          if(newGrid[j].col == newGrid[k].col || newGrid[j].row == newGrid[k].row || newGrid[j].square == newGrid[k].square){
+          
+            var index = posGrid[k].possi.indexOf(newGrid[j].answer);
+            //console.log('condi test');
+            //console.log(posGrid[0].solved);
+            if(index > -1){
+              console.log('splice if test');
+              posGrid[k].possi.splice(index, 1);
+              
+              console.log(posGrid[k]);
+              console.log(posGrid);
+              this.setState({posArray: posGrid});
+              }
+          }
+            
         }
+        //checks to so see if its the only valid location of a number
+        //console.log(this.compArrayBuilder('col',0,this.state.posArray));
+        /*
+        *
+        *
+        * 
+        * leaving off point!!!
+        * 
+        * abstract to function! run for rows/cols/squares
+        * finish/fix logic, check if any values are excluded from all of the 8 other arrays, if so set squares answer to that
+        */
+        var compArray = this.compArrayBuilder('col',newGrid[j].col,posGrid);
+        for (var t = 0; t < 8; t++){
+          var counter = 0;
+
+          //starting i at 1, it needs to be compared to the values in the possibility arrays
+          for(var i = 1; i < 9; i++){
+            //making sure we dont look at the current block for the comparisons
+            if(compArray[t].id != newGrid[j].id){
+              if(compArray[t].possi.indexOf(i) < 0){
+                //if counter hits 7 that means our block has to be i
+                counter++;
+              }
+            }
+          }
+
+        }
+        console.log('comp array');
+        console.log(compArray);
       }
     }
     
-    this.setState({posArray: posGrid}); //fix vari names!
+    
+    console.log('state pos test');
+    console.log(this.state.posArray);
     return newGrid;
   };
   onClick = (event) => {
-    console.log("test3");
     
-    console.log(this.state);
-    
-    
-
-
     this.setState({inputGrid : this.gridSolve(this.state.inputGrid, this.state.posArray)})
-    console.log('pos grid?');
-    console.log(this.state.posArray);
+    console.log(this.compArrayBuilder('col',0,this.state.posArray));
   };
 
   handleChange = (event, id) =>{
     event.persist();
     console.log("handleChangeTest");
+    //console.log(this.state.posArray);
     //console.log(event);
 
     var newGrid = this.state.inputGrid;
 
-    newGrid[id].answer = event.target.value;
+    newGrid[id].answer = parseInt(event.target.value, 10);
 
     this.setState({inputGrid : newGrid});
+    
     
   }
   render(){
     //console.log(this.state);
-    var posArray = this.arrayBuilder(); //debug to test logic
-    //console.log(posArray);
+    //var posArray = this.arrayBuilder(); //debug to test logic
+    //console.log(this.state.posArray);
     
     return (
       <div>
