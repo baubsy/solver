@@ -142,12 +142,14 @@ class InputGrid extends React.Component {
     //do this untill solved or deemed unsolvable
 
     //filling in known values
-     
-      
+
+
     for(var i= 0; i < gridSize; i++){
       if(newGrid[i].answer != ''){
         posGrid[i].solved = true;
       }
+      //wrong place for this? filling in knon values here?
+      /*
       if(posGrid[i].possi.length === 1 && posGrid[i].solved === false){
         //console.log('iftest2');
         newGrid[i].answer = posGrid[i].possi[0];
@@ -155,7 +157,8 @@ class InputGrid extends React.Component {
         //console.log(newGrid);
         //console.log(posGrid);
       }
-    }  
+      */
+    }
     //console.log('grid post array insertion')
     //console.log(posGrid);
     //comparing each grid element to each other
@@ -165,29 +168,29 @@ class InputGrid extends React.Component {
         for(var k = 0; k< gridSize; k++){
           //reduces possibility array elements
           if(newGrid[j].col == newGrid[k].col || newGrid[j].row == newGrid[k].row || newGrid[j].square == newGrid[k].square){
-          
+
             var index = posGrid[k].possi.indexOf(newGrid[j].answer);
             //console.log('condi test');
             //console.log(posGrid[0].solved);
             if(index > -1){
-              console.log('splice if test');
+              //console.log('splice if test');
               posGrid[k].possi.splice(index, 1);
-              
-              console.log(posGrid[k]);
-              console.log(posGrid);
-              this.setState({posArray: posGrid});
+
+              //console.log(posGrid[k]);
+              //console.log(posGrid);
+              //this.setState({posArray: posGrid});//debug original location, moved below compArrays
               }
           }
-            
+
         }
         //checks to so see if its the only valid location of a number
         //console.log(this.compArrayBuilder('col',0,this.state.posArray));
         /*
         *
         *
-        * 
+        *
         * leaving off point!!!
-        * 
+        *
         * abstract to function! run for rows/cols/squares
         * finish/fix logic, check if any values are excluded from all of the 8 other arrays, if so set squares answer to that
         */
@@ -196,36 +199,42 @@ class InputGrid extends React.Component {
           var counter = 0;
 
           //starting i at 1, it needs to be compared to the values in the possibility arrays
-          for(var i = 1; i < 9; i++){
+          for(var i = 1; i < 10; i++){
             //making sure we dont look at the current block for the comparisons
             if(compArray[t].id != newGrid[j].id){
               if(compArray[t].possi.indexOf(i) < 0){
-                //if counter hits 7 that means our block has to be i
+                //if counter hits 8 that means our block has to be i
                 counter++;
               }
+            }
+            if(counter === 8){
+              //FIX Redundant from line 150~? why do it both places?
+              newGrid[compArray[t].id].answer = compArray[t].possi[0];
+              posGrid[compArray[t].id].solved = true;
             }
           }
 
         }
-        console.log('comp array');
-        console.log(compArray);
+        //console.log('comp array');
+        //console.log(compArray);
       }
     }
-    
-    
-    console.log('state pos test');
-    console.log(this.state.posArray);
+
+
+    //console.log('state pos test');
+    //console.log(this.state.posArray);
+    this.setState({posArray: posGrid});
     return newGrid;
   };
   onClick = (event) => {
-    
+
     this.setState({inputGrid : this.gridSolve(this.state.inputGrid, this.state.posArray)})
-    console.log(this.compArrayBuilder('col',0,this.state.posArray));
+    //console.log(this.compArrayBuilder('col',0,this.state.posArray));
   };
 
   handleChange = (event, id) =>{
     event.persist();
-    console.log("handleChangeTest");
+    //console.log("handleChangeTest");
     //console.log(this.state.posArray);
     //console.log(event);
 
@@ -234,17 +243,17 @@ class InputGrid extends React.Component {
     newGrid[id].answer = parseInt(event.target.value, 10);
 
     this.setState({inputGrid : newGrid});
-    
-    
+
+
   }
   render(){
     //console.log(this.state);
     //var posArray = this.arrayBuilder(); //debug to test logic
     //console.log(this.state.posArray);
-    
+
     return (
       <div>
-      <form>
+      <form autoComplete="off">
         <table id="inputTable">
           <tbody>
           <tr>
