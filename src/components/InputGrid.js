@@ -137,52 +137,46 @@ class InputGrid extends React.Component {
 
     var gridSize = Object.keys(grid).length;
 
-    console.log('posGrid');
+    console.log('posGrid pre solve');
     console.log(posGrid);
     //do this untill solved or deemed unsolvable
 
-    //filling in known values
-
-
+    //filling in known values, replaces the possibility array with an array with just the filled in value
     for(var i= 0; i < gridSize; i++){
       if(newGrid[i].answer != ''){
         posGrid[i].solved = true;
+        posGrid[i].possi.splice(0, posGrid[i].possi.length, [newGrid[i].answer])
       }
-      //wrong place for this? filling in knon values here?
-      /*
+
+      //If a spot has only one possible answer left sets that as the answer
       if(posGrid[i].possi.length === 1 && posGrid[i].solved === false){
         //console.log('iftest2');
         newGrid[i].answer = posGrid[i].possi[0];
         posGrid[i].solved = true;
+        console.log("Block Possiblity Answered")
         //console.log(newGrid);
         //console.log(posGrid);
       }
-      */
+
     }
     //console.log('grid post array insertion')
     //console.log(posGrid);
     //comparing each grid element to each other
     console.log(newGrid);
     for(var j= 0; j< gridSize; j++){
-      if(newGrid[j].answer != ''){
+      if(newGrid[j].answer !== ''){
         for(var k = 0; k< gridSize; k++){
-          //reduces possibility array elements
+          //reduces possibility array elements, comparing blocks in the same row/col/square
           if(newGrid[j].col == newGrid[k].col || newGrid[j].row == newGrid[k].row || newGrid[j].square == newGrid[k].square){
-
             var index = posGrid[k].possi.indexOf(newGrid[j].answer);
-            //console.log('condi test');
-            //console.log(posGrid[0].solved);
+            //if the value already exists in this row/col/square it crosses it off the list for this block
             if(index > -1){
-              //console.log('splice if test');
               posGrid[k].possi.splice(index, 1);
-
-              //console.log(posGrid[k]);
-              //console.log(posGrid);
-              //this.setState({posArray: posGrid});//debug original location, moved below compArrays
               }
           }
 
         }
+      }
         //checks to so see if its the only valid location of a number
         //console.log(this.compArrayBuilder('col',0,this.state.posArray));
         /*
@@ -193,32 +187,93 @@ class InputGrid extends React.Component {
         *
         * abstract to function! run for rows/cols/squares
         * finish/fix logic, check if any values are excluded from all of the 8 other arrays, if so set squares answer to that
+
+        Process of elimination is broken(ex:this is the only spot in this column 9 could go)
         */
+        //If the number cant go anywhere else it will set it to that number
         var compArray = this.compArrayBuilder('col',newGrid[j].col,posGrid);
-        for (var t = 0; t < 8; t++){
+        //checking numbers 1-9
+        console.log("comp array");
+        console.log(compArray);
+        if(newGrid[j].answer === ''){
+          for (var t = 1; t < 10; t++){
           var counter = 0;
 
-          //starting i at 1, it needs to be compared to the values in the possibility arrays
-          for(var i = 1; i < 10; i++){
-            //making sure we dont look at the current block for the comparisons
-            if(compArray[t].id != newGrid[j].id){
-              if(compArray[t].possi.indexOf(i) < 0){
-                //if counter hits 8 that means our block has to be i
-                counter++;
+          compArray.forEach(function(possiArray) {
+            if(j === 0){
+            console.log("possiArray");
+            console.log(possiArray);}
+            //FIX not counting right, need to look at the inside the array of possibillity arrays
+            if(possiArray.id !== newGrid[j].id && possiArray.possi.indexOf(t) === -1 && (possiArray.possi.length !== 1 && possiArray.possi[0] !== t)){ //Avoiding looking at current block for comparisons
+              //not checking if 3 has been solved for the col already leading to everything being 3 if its not filled on or ruled out
+              counter++;
+          }
+          })
+            if(t === 1 && j === 0){
+              console.log(counter);
+            }
+            if(counter === 8 && newGrid[j].answer === ''){
+              //console.log(newGrid[compArray[t].id] + "answer is " + newGrid[compArray[t].id].answer);
+              newGrid[j].answer = t;
+              posGrid[j].solved = true;
+
+              console.log("Counter triggered Answer");
+              console.log("block id " + j + ":" + newGrid[j].answer);
+            }
+          }}
+          /* Old way of doing it
+          var compRowArray = this.compArrayBuilder('row',newGrid[j].row,posGrid);
+          for (var t = 0; t < 8; t++){
+            var counter = 0;
+
+            //starting i at 1, it needs to be compared to the values in the possibility arrays
+            for(var i = 1; i < 10; i++){
+              //making sure we dont look at the current block for the comparisons
+              if(compRowArray[t].id != newGrid[j].id){
+                if(compRowArray[t].possi.indexOf(i) > -1){
+                  //if counter hits 8 that means our block has to be i
+                  counter++;
+                }
               }
             }
-            if(counter === 8){
-              //FIX Redundant from line 150~? why do it both places?
-              newGrid[compArray[t].id].answer = compArray[t].possi[0];
-              posGrid[compArray[t].id].solved = true;
+              //console.log("comp array answer" + compArray);
+              if(counter === 8 && newGrid[compRowArray[t].id] === ''){
+                //FIX Redundant from line 150~? why do it both places?
+                console.log(newGrid[compRowArray[t].id] + "answer is " + newGrid[compRowArray[t].id].answer);
+                newGrid[compRowArray[t].id].answer = compRowArray[t].possi[0];
+                posGrid[compRowArray[t].id].solved = true;
+              }
             }
-          }
+            var compSqArray = this.compArrayBuilder('square',newGrid[j].square,posGrid);
+            for (var t = 0; t < 8; t++){
+              var counter = 0;
 
-        }
+              //starting i at 1, it needs to be compared to the values in the possibility arrays
+              for(var i = 1; i < 10; i++){
+                //making sure we dont look at the current block for the comparisons
+                if(compSqArray[t].id != newGrid[j].id){
+                  if(compSqArray[t].possi.indexOf(i) < 0){
+                    //if counter hits 8 that means our block has to be i
+                    counter++;
+                  }
+                }
+              }
+                //console.log("comp array answer" + compArray);
+                if(counter === 8 && newGrid[compSqArray[t].id] === ''){
+                  //FIX Redundant from line 150~? why do it both places?
+                  console.log(newGrid[compSqArray[t].id] + "answer is " + newGrid[compSqArray[t].id].answer);
+                  newGrid[compSqArray[t].id].answer = compSqArray[t].possi[0];
+                  posGrid[compSqArray[t].id].solved = true;
+                }
+              }
+
+              */
+
+
         //console.log('comp array');
         //console.log(compArray);
       }
-    }
+
 
 
     //console.log('state pos test');
