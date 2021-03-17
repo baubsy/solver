@@ -130,7 +130,6 @@ class InputGrid extends React.Component {
 
     return posArray;
   };
-  //FIX, Never returns true, receives data right?
   numberSolved(id, grid, answer){
     var solved = 0;
 
@@ -139,7 +138,6 @@ class InputGrid extends React.Component {
         if(grid[j].answer === answer){
           solved = 1;
         }
-        //console.log("test33");
       }
     }
     /*
@@ -192,9 +190,46 @@ class InputGrid extends React.Component {
     //console.log(solved);
     //console.log("ID: " + id + " " + solved)
     */
-    
+
     return solved;
   };
+  deepPossiReduce(posArray){
+    var posGrid = posArray;
+
+
+    for(var d= 0; d<81; d++){
+
+
+      var sqArray = this.compArrayBuilder('square', d, posGrid);
+      for(var i = 1; i < 10; i++){
+        var blocked = 0; //tracks if the possiblites in the square blocks certain answers in rows/cols
+        sqArray.forEach(function(sq){
+          if(i === 7 && sq.square === 0){
+            console.log(sq);
+          }
+          if(sq.possi.indexOf(i) > -1 && posGrid[d].col !== sq.col && sq.id !== posGrid[d].id){
+            blocked = 1;
+            console.log("blok test");
+          }
+        })
+        console.log("block test" + d + blocked);
+        if(blocked === 0){
+          console.log("block 2");
+          for(var k = 0; k < 81; k++){
+            if(posGrid[d].col === posGrid[k].col && posGrid[d].square !== posGrid[k].square){
+              if(posGrid[k].possi.indexOf(i) > -1 && posGrid[k].possi.length > 1){
+                //FIX butchering posGrid somehow
+                var index = posGrid[k].possi.indexOf(i);
+                posGrid[k].possi.splice(index, 1)
+              }
+            }
+          }
+        }
+      }
+    }
+    return posGrid;
+  };
+  //crosses off possible answers based on known values if blocks share a square/col/or row
   possiReduce(id, grid, answer){
     var newGrid = grid;
     for(var j= 0; j< 81; j++){
@@ -208,6 +243,33 @@ class InputGrid extends React.Component {
     }
     //console.log(newGrid);
     return newGrid;
+  };
+  //function to check if grid is SOLVED FIX/Start Here
+  solveCheck = (posGrid) => {
+    var grid = posGrid;
+    var solved = 1;
+    for(var i = 0; i < 81; i++){
+      if(grid[i].solved == 0){
+        solved = 0;
+        break;
+      }
+    }
+    return solved;
+  };
+  //function to solve grid as much as possible
+  fullSolve = () => {
+    var posGrid = this.state.posArray;
+    var escapeCounter = 0;
+    var solved = 0;
+    do {
+      //check if solved with function
+      solved = this.solveCheck(posGrid);
+      escapeCounter++;
+
+      this.setState({inputGrid : this.gridSolve(this.state.inputGrid, this.state.posArray)})
+
+    } while(escapeCounter < 20 && solved == 0);
+
   };
   gridSolve(grid, posState){
     var posGrid = posState;
@@ -241,6 +303,7 @@ class InputGrid extends React.Component {
     //console.log(posGrid);
     //comparing each grid element to each other
     console.log(newGrid);
+
     for(var j= 0; j< gridSize; j++){
       if(newGrid[j].answer !== ''){
         for(var k = 0; k< gridSize; k++){
@@ -406,6 +469,7 @@ class InputGrid extends React.Component {
 
     //console.log('state pos test');
     //console.log(this.state.posArray);
+    //posGrid = this.deepPossiReduce(posGrid);
     this.setState({posArray: posGrid});
     return newGrid;
   };
@@ -543,6 +607,7 @@ class InputGrid extends React.Component {
         </table>
         <button type="button" onClick={this.onClick}>Solve!</button>
         <button type="button" onClick={this.debugClick}>debug</button>
+        <button type="button" onClick={this.fullSolve}>Full Solve</button>
       </form>
       </div>
     );
