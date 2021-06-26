@@ -1,15 +1,7 @@
 import React from 'react';
-//import _ from 'lodash';
 
 class InputGrid extends React.Component {
-  //const gridSize = 9;
-  //const grid = [];
-
-  //Not right but somethign like this
-  //var stateArray = this.arrayBuilder('answer');
-  state = {inputGrid : this.arrayBuilder('answer'), posArray : this.arrayBuilder()};
-
-  //first approach, not used
+  state = {inputGrid : this.arrayBuilder('answer'), posArray : this.arrayBuilder(), previousGrid : this.arrayBuilder('answer'), previousArray : this.arrayBuilder()};
   gridBuilder(){
     const gridSize = 9;
     let grid = [];
@@ -17,17 +9,14 @@ class InputGrid extends React.Component {
 
     for(let i = 0; i < gridSize; i++) {
       //above builds columns
-      //turn this into a table?
-
       for(let i = 0; i < gridSize; i++){
         //above builds rows
         grid.push(<input key = {key} size = {1} maxLength = {1} defaultValue = {this.state.inputGrid[i].answer}></input>);
         key++;
       }
 
-      //grid.push(</tr>);
     }
-    //grid.push(</table>);
+
     return grid;
   };
 
@@ -140,56 +129,7 @@ class InputGrid extends React.Component {
         }
       }
     }
-    /*
-    //console.log(id);
-    //console.log("comp array");
-    //console.log(compArray);
-    var colArray = this.compArrayBuilder('col',posGrid[id].col,posGrid);
-    var rowArray  = this.compArrayBuilder('row',posGrid[id].row,posGrid);
-    var sqArray = this.compArrayBuilder('square',posGrid[id].square,posGrid);
-    colArray.forEach(function(possiArray){
-      var debugPossi = possiArray.possi[0];
-      //console.log("possi array 0th index");
-      //console.log(possiArray.possi[0]);
-      //console.log("debug Possi: " + debugPossi + "solved " + solved + "Answer " + answer);
 
-      if(possiArray.solved === 1 && debugPossi === answer){
-        //console.log(answer + "NuMBER SOLVED TRUE TEST " + debugPossi + possiArray.solved);
-        solved = 1;
-      }
-    })
-    if(id === 1){
-      console.log("Before row" + solved);
-    }
-    rowArray.forEach(function(possiArray){
-      var debugPossi = possiArray.possi[0];
-
-      //console.log("possi array 0th index");
-      //console.log(possiArray.possi[0]);
-      //console.log("debug Possi: " + debugPossi + "solved " + solved + "Answer " + answer);
-
-      if(possiArray.solved === 1 && debugPossi === answer){
-        //console.log(answer + "NuMBER SOLVED TRUE TEST " + debugPossi + possiArray.solved);
-        solved = 1;
-      }
-    })
-    if(id === 1){
-      console.log("Before row" + solved);
-    }
-    sqArray.forEach(function(possiArray){
-      var debugPossi = possiArray.possi[0];
-      //console.log("possi array 0th index");
-      //console.log(possiArray.possi[0]);
-      //console.log("debug Possi: " + debugPossi + "solved " + solved + "Answer " + answer);
-
-      if(possiArray.solved === 1 && debugPossi === answer){
-        //console.log(answer + "NuMBER SOLVED TRUE TEST " + debugPossi + possiArray.solved);
-        solved = 1;
-      }
-    })
-    //console.log(solved);
-    //console.log("ID: " + id + " " + solved)
-    */
 
     return solved;
   };
@@ -241,7 +181,6 @@ class InputGrid extends React.Component {
           }
       }
     }
-    //console.log(newGrid);
     return newGrid;
   };
   //function to check if grid is SOLVED FIX/Start Here
@@ -290,19 +229,12 @@ class InputGrid extends React.Component {
 
       //If a spot has only one possible answer left sets that as the answer
       if(posGrid[i].possi.length === 1 && posGrid[i].solved === 0){
-        //console.log('iftest2');
         newGrid[i].answer = posGrid[i].possi[0];
         posGrid[i].solved = 1;
-        //console.log("Block Possiblity Answered")
-        //console.log(newGrid);
-        //console.log(posGrid);
       }
 
     }
-    //console.log('grid post array insertion')
-    //console.log(posGrid);
     //comparing each grid element to each other
-    console.log(newGrid);
 
     for(var j= 0; j< gridSize; j++){
       if(newGrid[j].answer !== ''){
@@ -319,18 +251,6 @@ class InputGrid extends React.Component {
         }
       }
         //checks to so see if its the only valid location of a number
-        //console.log(this.compArrayBuilder('col',0,this.state.posArray));
-        /*
-        *
-        *
-        *
-        * leaving off point!!!
-        *
-        * abstract to function! run for rows/cols/squares
-        * finish/fix logic, check if any values are excluded from all of the 8 other arrays, if so set squares answer to that
-
-        Process of elimination is broken(ex:this is the only spot in this column 9 could go)
-        */
         //If the number cant go anywhere else it will set it to that number
         var compArray = this.compArrayBuilder('col',newGrid[j].col,posGrid);
         //checking numbers 1-9
@@ -338,10 +258,8 @@ class InputGrid extends React.Component {
         if(newGrid[j].answer === ''){
           for (var t = 1; t < 10; t++){
           var counter = 0;
-          //console.log(this.numberSolved(compArray, t));
           if(this.numberSolved(j, newGrid, t) === 0){
           compArray.forEach(function(possiArray) {
-            //possiArray.id !== newGrid[j].id && possiArray.possi.indexOf(t) === -1 && (possiArray.possi.length !== 1 && possiArray.possi[0] !== t
             if(possiArray.id !== newGrid[j].id && possiArray.possi.indexOf(t) === -1){
               //Avoiding looking at current block for comparisons/makes sure the answer(t) isn't in a differnt spot in the column
 
@@ -350,12 +268,8 @@ class InputGrid extends React.Component {
           })
 
             if(counter === 8 && newGrid[j].answer === ''){
-              //console.log(newGrid[compArray[t].id] + "answer is " + newGrid[compArray[t].id].answer);
               newGrid[j].answer = t;
               posGrid[j].solved = 1;
-
-              //console.log("COL Counter triggered Answer");
-              //console.log("block id " + j + ":" + newGrid[j].answer);
             }
           }}}
           compArray = this.compArrayBuilder('row',newGrid[j].row,posGrid);
@@ -364,10 +278,8 @@ class InputGrid extends React.Component {
           if(newGrid[j].answer === ''){
             for (var t = 1; t < 10; t++){
             var counter = 0;
-            //console.log(this.numberSolved(compArray, t));
             if(this.numberSolved(j, newGrid, t) === 0){
             compArray.forEach(function(possiArray) {
-              //possiArray.id !== newGrid[j].id && possiArray.possi.indexOf(t) === -1 && (possiArray.possi.length !== 1 && possiArray.possi[0] !== t
               if(possiArray.id !== newGrid[j].id && possiArray.possi.indexOf(t) === -1){
                 //Avoiding looking at current block for comparisons/makes sure the answer(t) isn't in a differnt spot in the column
 
@@ -376,26 +288,18 @@ class InputGrid extends React.Component {
             })
 
               if(counter === 8 && newGrid[j].answer === ''){
-                //console.log(newGrid[compArray[t].id] + "answer is " + newGrid[compArray[t].id].answer);
                 newGrid[j].answer = t;
                 posGrid[j].solved = 1;
-
-                //console.log(" ROW Counter triggered Answer");
-                //console.log("block id " + j + ":" + newGrid[j].answer);
               }
             }}}
             compArray = this.compArrayBuilder('square',newGrid[j].square,posGrid);
-            //console.log("Square comp array for block " + j);
-            //console.log(compArray);
             //checking numbers 1-9
 
             if(newGrid[j].answer === ''){
               for (var t = 1; t < 10; t++){
               var counter = 0;
-              //console.log(this.numberSolved(compArray, t));
               if(this.numberSolved(j, newGrid, t) === 0){
               compArray.forEach(function(possiArray) {
-                //possiArray.id !== newGrid[j].id && possiArray.possi.indexOf(t) === -1 && (possiArray.possi.length !== 1 && possiArray.possi[0] !== t
                 if(possiArray.id !== newGrid[j].id && possiArray.possi.indexOf(t) === -1){
                   //Avoiding looking at current block for comparisons/makes sure the answer(t) isn't in a differnt spot in the column
 
@@ -404,91 +308,40 @@ class InputGrid extends React.Component {
               })
 
                 if(counter === 8 && newGrid[j].answer === ''){
-                  //console.log(newGrid[compArray[t].id] + "answer is " + newGrid[compArray[t].id].answer);
                   newGrid[j].answer = t;
                   posGrid[j].solved = 1;
-
-                  //console.log("Square Counter triggered Answer");
-                  //console.log("block id " + j + ":" + newGrid[j].answer);
                 }
               }}}
-          /* Old way of doing it
-          var compRowArray = this.compArrayBuilder('row',newGrid[j].row,posGrid);
-          for (var t = 0; t < 8; t++){
-            var counter = 0;
-
-            //starting i at 1, it needs to be compared to the values in the possibility arrays
-            for(var i = 1; i < 10; i++){
-              //making sure we dont look at the current block for the comparisons
-              if(compRowArray[t].id != newGrid[j].id){
-                if(compRowArray[t].possi.indexOf(i) > -1){
-                  //if counter hits 8 that means our block has to be i
-                  counter++;
-                }
-              }
-            }
-              //console.log("comp array answer" + compArray);
-              if(counter === 8 && newGrid[compRowArray[t].id] === ''){
-                //FIX Redundant from line 150~? why do it both places?
-                console.log(newGrid[compRowArray[t].id] + "answer is " + newGrid[compRowArray[t].id].answer);
-                newGrid[compRowArray[t].id].answer = compRowArray[t].possi[0];
-                posGrid[compRowArray[t].id].solved = true;
-              }
-            }
-            var compSqArray = this.compArrayBuilder('square',newGrid[j].square,posGrid);
-            for (var t = 0; t < 8; t++){
-              var counter = 0;
-
-              //starting i at 1, it needs to be compared to the values in the possibility arrays
-              for(var i = 1; i < 10; i++){
-                //making sure we dont look at the current block for the comparisons
-                if(compSqArray[t].id != newGrid[j].id){
-                  if(compSqArray[t].possi.indexOf(i) < 0){
-                    //if counter hits 8 that means our block has to be i
-                    counter++;
-                  }
-                }
-              }
-                //console.log("comp array answer" + compArray);
-                if(counter === 8 && newGrid[compSqArray[t].id] === ''){
-                  //FIX Redundant from line 150~? why do it both places?
-                  console.log(newGrid[compSqArray[t].id] + "answer is " + newGrid[compSqArray[t].id].answer);
-                  newGrid[compSqArray[t].id].answer = compSqArray[t].possi[0];
-                  posGrid[compSqArray[t].id].solved = true;
-                }
-              }
-
-              */
-
-
-        //console.log('comp array');
-        //console.log(compArray);
       }
 
-
-
-    //console.log('state pos test');
-    //console.log(this.state.posArray);
     //posGrid = this.deepPossiReduce(posGrid);
     this.setState({posArray: posGrid});
     return newGrid;
   };
   onClick = (event) => {
-
     this.setState({inputGrid : this.gridSolve(this.state.inputGrid, this.state.posArray)})
-    //console.log(this.compArrayBuilder('col',0,this.state.posArray));
   };
   debugClick = (event) => {
+    console.log(this.state.previousArray);
+  };
+  handleUndo = () => {
+    //Do a undo history that it steps back through, will fix problem
+    //simple 1 step undo, disable undo button until another change is made
+    console.log("undo");
+    this.setState({inputGrid: this.state.previousGrid, posArray: this.state.previousArray});
+    console.log(this.state.inputGrid);
+    //this.setState({posArray: this.state.previousArray});
     console.log(this.state.posArray);
+
   };
   handleChange = (event, id) =>{
     event.persist();
-    //console.log("handleChangeTest");
-    //console.log(this.state.posArray);
-    //console.log(event);
-
+    console.log("udate test");
     var newGrid = this.state.inputGrid;
     var posGrid = this.state.posArray;
+
+    //saving previous state for undo
+    //this.setState({previousGrid: newGrid, previousArray: posGrid});
     var answer = parseInt(event.target.value, 10);
 
     posGrid[id].solved = 1;
@@ -497,19 +350,15 @@ class InputGrid extends React.Component {
     posGrid[id].possi.splice(0, posGrid[id].possi.length, [newGrid[id].answer]);
     console.log(posGrid);
 
-    this.setState({inputGrid : newGrid});
-    this.setState({posArray: this.possiReduce(id, posGrid, answer)});
-    console.log(this.state.posArray);
+    this.setState({previousGrid: this.state.inputGrid, previousArray: this.state.posArray});
+    this.setState({posArray: this.possiReduce(id, posGrid, answer), inputGrid : newGrid});
   }
   render(){
-    //console.log(this.state);
-    //var posArray = this.arrayBuilder(); //debug to test logic
-    //console.log(this.state.posArray);
-
+    console.log("render test");
     return (
       <div>
       <form autoComplete="off">
-        <table id="inputTable">
+        <table id="inputTable" cellspacing ="0" cellpadding="0">
           <tbody>
           <tr>
             <td><input id="0" maxLength="1" onChange = {(e) => {this.handleChange(e, 0)}} value ={this.state.inputGrid[0].answer}/></td>
@@ -608,6 +457,7 @@ class InputGrid extends React.Component {
         <button type="button" onClick={this.onClick}>Solve!</button>
         <button type="button" onClick={this.debugClick}>debug</button>
         <button type="button" onClick={this.fullSolve}>Full Solve</button>
+        <button type="button" onClick={this.handleUndo}>Undo</button>
       </form>
       </div>
     );
