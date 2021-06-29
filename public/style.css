@@ -3,6 +3,7 @@ input {
 	height: 36px;
 	border-color: black;
 	text-align: center;
+	outline-width: 0px;
 }
 [id="0"], [id="1"],[id="2"],[id="3"],[id="4"],[id="5"],[id="6"],[id="7"],[id="8"],
 [id="27"],[id="28"],[id="29"],[id="30"],[id="31"],[id="32"],[id="33"],[id="34"],[id="35"],
@@ -25,4 +26,11 @@ input {
 [id="3"],[id="12"],[id="21"],[id="30"],[id="39"],[id="48"],[id="57"],[id="66"],[id="75"],
 [id="6"],[id="15"],[id="24"],[id="33"],[id="42"],[id="51"],[id="60"],[id="69"],[id="78"]{
 	border-left-color: green;
+}
+#btns{
+	margin: auto;
+	width: fit-content;
+}
+table{
+	margin: auto;
 }

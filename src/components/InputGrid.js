@@ -454,10 +454,14 @@ class InputGrid extends React.Component {
           </tr>
           </tbody>
         </table>
-        <button type="button" onClick={this.onClick}>Solve!</button>
-        <button type="button" onClick={this.debugClick}>debug</button>
-        <button type="button" onClick={this.fullSolve}>Full Solve</button>
-        <button type="button" onClick={this.handleUndo}>Undo</button>
+        <div>
+          <div  id="btns">
+          <button type="button" onClick={this.onClick}>Solve!</button>
+          <button type="button" onClick={this.debugClick}>debug</button>
+          <button type="button" onClick={this.fullSolve}>Full Solve</button>
+          <button type="button" onClick={this.handleUndo}>Undo</button>
+          </div>
+        </div>
       </form>
       </div>
     );
