@@ -1,36 +1,49 @@
 input {
 	width: 36px;
 	height: 36px;
-	border-color: black;
+	border-color: #686375;
 	text-align: center;
 	outline-width: 0px;
 }
 [id="0"], [id="1"],[id="2"],[id="3"],[id="4"],[id="5"],[id="6"],[id="7"],[id="8"],
 [id="27"],[id="28"],[id="29"],[id="30"],[id="31"],[id="32"],[id="33"],[id="34"],[id="35"],
 [id="54"],[id="55"],[id="56"],[id="57"],[id="58"],[id="59"],[id="60"],[id="61"],[id="62"] {
-	border-top-color: green;
+	border-top-color: #A985F5;
 }
 [id="72"],[id="73"],[id="74"],[id="75"],[id="76"],[id="77"],[id="78"],[id="79"],[id="80"],
 [id="18"],[id="19"],[id="20"],[id="21"],[id="22"],[id="23"],[id="24"],[id="25"],[id="26"],
 [id="45"],[id="46"],[id="47"],[id="48"],[id="49"],[id="50"],[id="51"],[id="52"],[id="53"]{
-	border-bottom-color: green;
+	border-bottom-color: #A985F5;
 }
 
 [id="2"],[id="11"],[id="20"],[id="29"],[id="38"],[id="47"],[id="56"],[id="65"],[id="74"],
 [id="5"],[id="14"],[id="23"],[id="32"],[id="41"],[id="50"],[id="59"],[id="68"],[id="77"],
 [id="8"],[id="17"],[id="26"],[id="35"],[id="44"],[id="53"],[id="62"],[id="71"],[id="80"]{
-	border-right-color: green;
+	border-right-color: #A985F5;
 }
 
 [id="0"],[id="9"],[id="18"],[id="27"],[id="36"],[id="45"],[id="54"],[id="63"],[id="72"],
 [id="3"],[id="12"],[id="21"],[id="30"],[id="39"],[id="48"],[id="57"],[id="66"],[id="75"],
 [id="6"],[id="15"],[id="24"],[id="33"],[id="42"],[id="51"],[id="60"],[id="69"],[id="78"]{
-	border-left-color: green;
+	border-left-color: #A985F5;
 }
 #btns{
 	margin: auto;
 	width: fit-content;
 }
+#gridBox{
+	display: block;
+	box-sizing: border-box;
+	width: fit-content;
+	padding: 30px;
+	border: 1px solid black;
+	border-radius: 12px;
+	background-color: #8569C2;
+	margin: auto;
+}
 table{
 	margin: auto;
+}
+body{
+	background-color: #503F75;
 }
