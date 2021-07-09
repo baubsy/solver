@@ -25,7 +25,7 @@ let gridFunc = {
         let solved = 0;
 
         for (let j = 0; j < 81; j++) {
-            if (grid[j].col == grid[id].col || grid[j].row == grid[id].row || grid[j].square == grid[id].square) {
+            if (grid[j].col === grid[id].col || grid[j].row === grid[id].row || grid[j].square === grid[id].square) {
                 if (grid[j].answer === answer) {
                     solved = 1;
                 }
@@ -177,7 +177,7 @@ let gridFunc = {
     possiReduce(id, grid, answer) {
         let newGrid = grid;
         for (let j = 0; j < 81; j++) {
-            if (grid[j].col == grid[id].col || grid[j].row == grid[id].row || grid[j].square == grid[id].square) {
+            if (grid[j].col === grid[id].col || grid[j].row === grid[id].row || grid[j].square === grid[id].square) {
                 let index = grid[j].possi.indexOf(answer);
                 //if the value already exists in this row/col/square it crosses it off the list for this block
                 if (index > -1) {
@@ -192,7 +192,7 @@ let gridFunc = {
         let grid = posGrid;
         let solved = 1;
         for (let i = 0; i < 81; i++) {
-            if (grid[i].solved == 0) {
+            if (grid[i].solved === 0) {
                 solved = 0;
                 break;
             }
