@@ -4,23 +4,6 @@ let gridFunc = {
     test() {
         console.log("grid func test");
     },
-    gridBuilder() {
-        const gridSize = 9;
-        let grid = [];
-        let key = 0;
-
-        for (let i = 0; i < gridSize; i++) {
-            //above builds columns
-            for (let i = 0; i < gridSize; i++) {
-                //above builds rows
-                grid.push(<input key={key} size={1} maxLength={1} defaultValue={this.state.inputGrid[i].answer}></input>);
-                key++;
-            }
-
-        }
-
-        return grid;
-    },
     numberSolved(id, grid, answer) {
         let solved = 0;
 
@@ -175,7 +158,7 @@ let gridFunc = {
     },
     //crosses off possible answers based on known values if blocks share a square/col/or row
     possiReduce(id, grid, answer) {
-        let newGrid = grid;
+        let newGrid = Object.assign({}, grid);;
         for (let j = 0; j < 81; j++) {
             if (grid[j].col === grid[id].col || grid[j].row === grid[id].row || grid[j].square === grid[id].square) {
                 let index = grid[j].possi.indexOf(answer);
@@ -185,6 +168,8 @@ let gridFunc = {
                 }
             }
         }
+        console.log("possireduce return posgrid");
+        console.log(newGrid);
         return newGrid;
     },
     //function to check if grid is SOLVED FIX/Start Here
@@ -198,6 +183,154 @@ let gridFunc = {
             }
         }
         return solved;
+    },
+    gridSolve(grid, posState, stateHelper) {
+        //let posGrid = JSON.parse(JSON.stringify(posState));
+        //let newGrid = JSON.parse(JSON.stringify(grid));
+        let posGrid = Object.assign({}, posState);
+        let newGrid = Object.assign({}, grid);
+        
+
+        let gridSize = Object.keys(grid).length;
+
+        console.log('posGrid pre solve');
+        console.log(posGrid);
+        //do this untill solved or deemed unsolvable
+
+        //filling in known values, replaces the possibility array with an array with just the filled in value
+        for (let i = 0; i < gridSize; i++) {
+            if (newGrid[i].answer !== '') {
+                posGrid[i].solved = 1;
+                posGrid[i].possi.splice(0, posGrid[i].possi.length, [newGrid[i].answer])
+            }
+
+            //If a spot has only one possible answer left sets that as the answer
+            if (posGrid[i].possi.length === 1 && posGrid[i].solved === 0) {
+                newGrid[i].answer = posGrid[i].possi[0];
+                posGrid[i].solved = 1;
+            }
+
+        }
+        //comparing each grid element to each other
+
+        for (let j = 0; j < gridSize; j++) {
+            if (newGrid[j].answer !== '') {
+                for (let k = 0; k < gridSize; k++) {
+                    //reduces possibility array elements, comparing blocks in the same row/col/square
+                    if (newGrid[j].col === newGrid[k].col || newGrid[j].row === newGrid[k].row || newGrid[j].square === newGrid[k].square) {
+                        let index = posGrid[k].possi.indexOf(newGrid[j].answer);
+                        //if the value already exists in this row/col/square it crosses it off the list for this block
+                        if (index > -1) {
+                            posGrid[k].possi.splice(index, 1);
+                        }
+                    }
+
+                }
+            }
+            //checks to so see if its the only valid location of a number
+            //If the number cant go anywhere else it will set it to that number
+            let compArray = gridFunc.compArrayBuilder('col', newGrid[j].col, posGrid);
+            //checking numbers 1-9
+
+            if (newGrid[j].answer === '') {
+                for (let t = 1; t < 10; t++) {
+                    let counter = 0;
+                    if (gridFunc.numberSolved(j, newGrid, t) === 0) {
+                        compArray.forEach(function (possiArray) {
+                            if (possiArray.id !== newGrid[j].id && possiArray.possi.indexOf(t) === -1) {
+                                //Avoiding looking at current block for comparisons/makes sure the answer(t) isn't in a differnt spot in the column
+
+                                counter++;
+                            }
+                        })
+
+                        if (counter === 8 && newGrid[j].answer === '') {
+                            newGrid[j].answer = t;
+                            posGrid[j].solved = 1;
+                        }
+                    }
+                }
+            }
+            compArray = gridFunc.compArrayBuilder('row', newGrid[j].row, posGrid);
+            //checking numbers 1-9
+
+            if (newGrid[j].answer === '') {
+                for (let t = 1; t < 10; t++) {
+                    let counter = 0;
+                    if (gridFunc.numberSolved(j, newGrid, t) === 0) {
+                        compArray.forEach(function (possiArray) {
+                            if (possiArray.id !== newGrid[j].id && possiArray.possi.indexOf(t) === -1) {
+                                //Avoiding looking at current block for comparisons/makes sure the answer(t) isn't in a differnt spot in the column
+
+                                counter++;
+                            }
+                        })
+
+                        if (counter === 8 && newGrid[j].answer === '') {
+                            newGrid[j].answer = t;
+                            posGrid[j].solved = 1;
+                        }
+                    }
+                }
+            }
+            compArray = gridFunc.compArrayBuilder('square', newGrid[j].square, posGrid);
+            //checking numbers 1-9
+
+            if (newGrid[j].answer === '') {
+                for (let t = 1; t < 10; t++) {
+                    let counter = 0;
+                    if (gridFunc.numberSolved(j, newGrid, t) === 0) {
+                        compArray.forEach(function (possiArray) {
+                            if (possiArray.id !== newGrid[j].id && possiArray.possi.indexOf(t) === -1) {
+                                //Avoiding looking at current block for comparisons/makes sure the answer(t) isn't in a differnt spot in the column
+
+                                counter++;
+                            }
+                        })
+
+                        if (counter === 8 && newGrid[j].answer === '') {
+                            newGrid[j].answer = t;
+                            posGrid[j].solved = 1;
+                            posGrid[j].answer = t;
+                        }
+                    }
+                }
+            }
+        }
+
+        //posGrid = this.deepPossiReduce(posGrid);
+        stateHelper(newGrid);
+        //this.setState({posArray: posGrid});
+        return newGrid;
+    },
+    recSolve(posGrid, startID, backstep){
+        //the last cell, the base case
+        let returnGrid = JSON.parse(JSON.stringify(posGrid));
+        if(backstep === true){
+            returnGrid[startID].possi.splice(0, 1);
+        }
+        if(startID === 80){
+            if(returnGrid[80].possi.length === 1){
+                returnGrid[80].answer = returnGrid[80].possi[0];
+                return returnGrid;
+            } else{
+                return this.recSolve(returnGrid, startID - 1, true);
+            }
+        } else if(returnGrid[startID].answer !== undefined){
+            //find first unsolved cell and assume first possibility is right, update possibility arrays
+        
+            //call recSolve on the remainder of the grid
+            return this.recSolve(returnGrid, startID + 1);
+        } else if(returnGrid[startID].answer === undefined){
+            returnGrid[startID].answer = returnGrid[startID].possi[0];
+            return this.recSolve(returnGrid, startID + 1);
+
+        } else{
+            console.log("recursion if break");
+        }
+        
+
+        //pass up if a previous answer is unviable and move forward
     }
 };
 
