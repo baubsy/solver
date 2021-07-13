@@ -33,6 +33,7 @@ class InputGrid extends React.Component {
     this.setState({ inputGrid: gridFunc.gridSolve(this.state.inputGrid, this.state.posArray, this.stateHelper) })
   };
   debugClick = (event) => {
+    this.setState({posArray: gridFunc.recReduce(this.state.posArray, 8)})
     console.log(this.state.posArray);
   };
   handleUndo = () => {
@@ -56,6 +57,7 @@ class InputGrid extends React.Component {
     let answer = parseInt(event.target.value, 10);
 
     posGrid[id].solved = 1;
+    posGrid[id].userInputted = true;
     posGrid[id].answer = answer;
     newGrid[id].answer = answer;
     console.log(answer);
@@ -63,14 +65,14 @@ class InputGrid extends React.Component {
     console.log(posGrid);
 
     //this.setState({ previousGrid: this.state.inputGrid, previousArray: this.state.posArray });
+    //TODO breaking old save by commenting out possiReduce here to make recSolve work.
     this.setState({ 
       previousGrid: this.state.inputGrid,
       previousArray: this.state.posArray,
-      posArray: gridFunc.possiReduce(id, posGrid, answer),
+      //posArray: gridFunc.possiReduce(id, posGrid, answer),
+      posArray: posGrid,
       inputGrid: newGrid });
     //this.setState({ posArray: gridFunc.possiReduce(id, posGrid, answer), inputGrid: newGrid });
-    console.log("onChange debug");
-    console.log(this.state.posArray);
   }
   rowBuilder = (startId) => {
     let row = [];
@@ -90,6 +92,21 @@ class InputGrid extends React.Component {
 
     return hmtlTable;
   }
+  newSolve = () => {
+    let reducedGrid = JSON.parse(JSON.stringify(this.state.posArray));
+    //console.log("newsolve reduced grid");
+    //console.log(reducedGrid);
+    for(let i = 0; i < this.state.posArray.length; i++){
+      if(this.state.posArray[i].answer > 0){
+        reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
+      }
+    }
+    console.log("new solve reduced grid");
+    console.log(reducedGrid);
+    //this.setState({posArray: reducedGrid});
+    this.setState({posArray: reducedGrid, inputGrid: gridFunc.recSolve(reducedGrid, 0)});
+    //console.log(this.state.inputGrid);
+  };
   render() {
     console.log("render test");
     return (
@@ -106,6 +123,7 @@ class InputGrid extends React.Component {
               <button type="button" onClick={this.debugClick}>debug</button>
               <button type="button" onClick={this.fullSolve}>Full Solve</button>
               <button type="button" onClick={this.handleUndo}>Undo</button>
+              <button type="button" onClick={this.newSolve}>Rec Solve</button>
             </div>
           </div>
         </form>

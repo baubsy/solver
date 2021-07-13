@@ -59,7 +59,7 @@ let gridFunc = {
             };
         } else {
             for (let d = 0; d < 81; d++) {
-                posArray.push({ id: d, row: null, col: null, square: null, possi: [1, 2, 3, 4, 5, 6, 7, 8, 9], solved: 0 }) //DEBUG value remove!
+                posArray.push({ id: d, row: null, col: null, square: null, possi: [1, 2, 3, 4, 5, 6, 7, 8, 9], solved: 0, userInputted: false }) //DEBUG value remove!
             }
         }
 
@@ -157,9 +157,12 @@ let gridFunc = {
         return posGrid;
     },
     //crosses off possible answers based on known values if blocks share a square/col/or row
-    possiReduce(id, grid, answer) {
-        let newGrid = Object.assign({}, grid);;
-        for (let j = 0; j < 81; j++) {
+    possiReduce(id, grid, answer, startID = 0) {
+        //console.log("possi reduce grid");
+        //console.log(grid);
+        //let newGrid = JSON.parse(JSON.stringify(grid));
+        let newGrid = grid;
+        for (let j = startID; j < 81; j++) {
             if (grid[j].col === grid[id].col || grid[j].row === grid[id].row || grid[j].square === grid[id].square) {
                 let index = grid[j].possi.indexOf(answer);
                 //if the value already exists in this row/col/square it crosses it off the list for this block
@@ -168,8 +171,16 @@ let gridFunc = {
                 }
             }
         }
-        console.log("possireduce return posgrid");
-        console.log(newGrid);
+        //console.log("possireduce return posgrid");
+        //console.log(newGrid);
+        return newGrid;
+    },
+    //function to help reduce possibility arrays for the recSolve function. starts form a block and moves down
+    recReduce(posGrid, startID){
+        let newGrid = posGrid;
+        for(let i = 0; i < startID + 1; i++){
+            newGrid = this.possiReduce(i, newGrid, newGrid[i].answer, startID + 1);
+        };
         return newGrid;
     },
     //function to check if grid is SOLVED FIX/Start Here
@@ -303,30 +314,76 @@ let gridFunc = {
         //this.setState({posArray: posGrid});
         return newGrid;
     },
-    recSolve(posGrid, startID, backstep){
-        //the last cell, the base case
-        let returnGrid = JSON.parse(JSON.stringify(posGrid));
-        if(backstep === true){
-            returnGrid[startID].possi.splice(0, 1);
+    possiRebuild(posGrid, startID){
+        //let newPossi = [1,2,3,4,5,6,7,8,9];
+        //let newGrid = JSON.parse(JSON.stringify(posGrid));
+        let newGrid = posGrid;
+        for(let i = startID; i < 81; i++){
+            newGrid[i].possi.splice(0, newGrid[i].possi.length);
+            for(let t = 1; t < 10; t++){
+                newGrid[i].possi.push(t);
+            }
+            //newPossi.map(x => newGrid[startID].possi.push(x));
         }
+        //console.log("inside possiRebuild");
+        //console.log(newGrid);
+        return newGrid;
+    },
+    recSolve(posGrid, startID, backstep){
+        //TODO repopulate and re reduce possi arrays after a back track
+        //the last cell, the base case
+        let returnGrid = JSON.parse(JSON.stringify(this.possiRebuild(posGrid, startID + 1)));
+        returnGrid = this.recReduce(returnGrid, startID)
+        
+        console.log(`return grid for square ${startID}`);
+        console.log(returnGrid);
         if(startID === 80){
             if(returnGrid[80].possi.length === 1){
                 returnGrid[80].answer = returnGrid[80].possi[0];
                 return returnGrid;
             } else{
                 return this.recSolve(returnGrid, startID - 1, true);
+                console.log("last square backstepped?");
             }
-        } else if(returnGrid[startID].answer !== undefined){
-            //find first unsolved cell and assume first possibility is right, update possibility arrays
-        
-            //call recSolve on the remainder of the grid
-            return this.recSolve(returnGrid, startID + 1);
-        } else if(returnGrid[startID].answer === undefined){
-            returnGrid[startID].answer = returnGrid[startID].possi[0];
+        } else if(backstep === true){
+            //returnGrid = JSON.parse(JSON.stringify(this.possiRebuild(returnGrid, startID + 1)));
+            //console.log("rebuilt grid");
+            //console.log(returnGrid);
+            //returnGrid = this.recReduce(returnGrid, startID);
+            //console.log("reduced grid");
+            //console.log(returnGrid);
+            if(posGrid[startID].userInputted === true){
+                return this.recSolve(returnGrid, startID - 1, true);
+            } else{
+                //backstep again if the only answer avaiable didn't work otherwise go further
+                //TODO properly remeber possI going forward but also refigure every subsequent square's following a backstep
+                returnGrid[startID].possi.splice(0, 1);
+                
+                if(returnGrid[startID].possi.length === 0){
+                    return this.recSolve(returnGrid, startID - 1, true);
+                    console.log("double backstep");
+                }else{
+                    returnGrid[startID].answer = returnGrid[startID].possi[0];
+                    returnGrid[startID].solved = 1;
+                    //reduce possiblities here?
+                    //returnGrid = this.possiReduce(startID, returnGrid, returnGrid[startID].answer, startID + 1);
+                    return this.recSolve(returnGrid, startID + 1);
+                }
+            }
+        }else if(posGrid[startID].userInputted === true){
             return this.recSolve(returnGrid, startID + 1);
 
+        }else if(posGrid[startID].possi.length === 0){
+            return this.recSolve(returnGrid, startID - 1, true);
+        }else if(posGrid[startID].userInputted === false){
+            returnGrid[startID].answer = posGrid[startID].possi[0];
+            returnGrid[startID].solved = 1;
+            //reduce possiblities here?
+            //returnGrid = this.possiReduce(startID, returnGrid, returnGrid[startID].answer, startID + 1);
+            //returnGrid = this.recReduce(returnGrid, startID);
+            return this.recSolve(returnGrid, startID + 1);
         } else{
-            console.log("recursion if break");
+            console.log("recusrion error");
         }
         
 
