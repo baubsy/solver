@@ -23,8 +23,8 @@ class InputGrid extends React.Component {
   };
   stateHelper = (inGrid) => {
     this.setState({ inputGrid: inGrid });
-    console.log("state helper");
-    console.log(this.state.posArray);
+    //console.log("state helper");
+    //console.log(this.state.posArray);
   };
 
   onClick = (event) => {
@@ -116,21 +116,25 @@ class InputGrid extends React.Component {
         reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
       }
     }
-    console.log("new solve reduced grid");
+    console.log("new solve reduced grid before gridSolve");
     //TODO change gridsolve to return pos grid, embrace hybrid approach?
-
-    /*
+    console.log(JSON.parse(JSON.stringify(reducedGrid)));
+    
     reducedGrid = gridFunc.gridSolve(this.state.inputGrid, reducedGrid, this.stateHelper);
+    console.log("after grid solve");
+    console.log(JSON.parse(JSON.stringify(reducedGrid)));
     //reducedGrid = gridFunc.recReduce(reducedGrid, 0);
     for(let i = 0; i < this.state.posArray.length; i++){
       if(this.state.posArray[i].answer != undefined){
         reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, reducedGrid[i].answer)));
       }
     }
-    */
+    let order = gridFunc.leastToMost(reducedGrid);
     console.log(JSON.parse(JSON.stringify(reducedGrid)));
+    console.log("order");
+    console.log(order);
     //this.setState({posArray: reducedGrid});
-    this.setState({posArray: reducedGrid, inputGrid: gridFunc.recSolve(reducedGrid, 0)});
+    this.setState({posArray: reducedGrid, inputGrid: gridFunc.recSolve(reducedGrid, 0, order)});
     //console.log(this.state.inputGrid);
   };
   render() {
