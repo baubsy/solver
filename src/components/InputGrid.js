@@ -21,8 +21,8 @@ class InputGrid extends React.Component {
       console.log("full solve impossible")
     }
   };
-  stateHelper = (inGrid) => {
-    this.setState({ inputGrid: inGrid });
+  stateHelper = (inGrid, pGrid) => {
+    this.setState({ inputGrid: inGrid, posArray: pGrid });
     //console.log("state helper");
     //console.log(this.state.posArray);
   };
@@ -30,7 +30,7 @@ class InputGrid extends React.Component {
   onClick = (event) => {
     console.log("onclick debug");
     console.log(this.state.posArray);
-    this.setState({ inputGrid: gridFunc.gridSolve(this.state.inputGrid, this.state.posArray, this.stateHelper) })
+    gridFunc.gridSolve(this.state.inputGrid, this.state.posArray, this.stateHelper);
   };
   debugClick = (event) => {
     /*
@@ -41,7 +41,7 @@ class InputGrid extends React.Component {
     //console.log("newsolve reduced grid");
     //console.log(reducedGrid);
     for(let i = 0; i < this.state.posArray.length; i++){
-      if(this.state.posArray[i].answer != undefined){
+      if(this.state.posArray[i].answer !== undefined){
         reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
       }
     };
@@ -111,11 +111,21 @@ class InputGrid extends React.Component {
     let reducedGrid = JSON.parse(JSON.stringify(this.state.posArray));
     //console.log("newsolve reduced grid");
     //console.log(reducedGrid);
-    for(let i = 0; i < this.state.posArray.length; i++){
-      if(this.state.posArray[i].answer != undefined){
-        reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
-      }
-    }
+    
+    let sum = gridFunc.possiSum(reducedGrid);
+    let newSum = -1;
+
+    do{
+      sum = newSum;
+      reducedGrid = gridFunc.gridSolve(this.state.inputGrid, reducedGrid, this.stateHelper);
+      for(let i = 0; i < this.state.posArray.length; i++){
+        if(this.state.posArray[i].answer !== undefined){
+          reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
+        };
+      };
+      newSum = gridFunc.possiSum(reducedGrid);
+    }while(sum !== newSum)
+    /*
     console.log("new solve reduced grid before gridSolve");
     //TODO change gridsolve to return pos grid, embrace hybrid approach?
     console.log(JSON.parse(JSON.stringify(reducedGrid)));
@@ -129,10 +139,11 @@ class InputGrid extends React.Component {
         reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, reducedGrid[i].answer)));
       }
     }
+    */
     let order = gridFunc.leastToMost(reducedGrid);
-    console.log(JSON.parse(JSON.stringify(reducedGrid)));
-    console.log("order");
-    console.log(order);
+    //console.log(JSON.parse(JSON.stringify(reducedGrid)));
+    //console.log("order");
+    //console.log(order);
     //this.setState({posArray: reducedGrid});
     this.setState({posArray: reducedGrid, inputGrid: gridFunc.recSolve(reducedGrid, 0, order)});
     //console.log(this.state.inputGrid);

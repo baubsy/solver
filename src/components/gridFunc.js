@@ -185,7 +185,7 @@ let gridFunc = {
     recReduce(posGrid, startID, order) {
         let newGrid = posGrid;
         for (let i = 0; i < 81; i++) {
-            if (newGrid[order[i]].answer != undefined) {
+            if (newGrid[order[i]].answer !== undefined) {
                 newGrid = this.possiReduce(i, newGrid, newGrid[order[i]].answer, startID + 1, order);
             }
 
@@ -207,14 +207,14 @@ let gridFunc = {
     gridSolve(grid, posState, stateHelper) {
         //let posGrid = JSON.parse(JSON.stringify(posState));
         //let newGrid = JSON.parse(JSON.stringify(grid));
-        let posGrid = Object.assign({}, posState);
-        let newGrid = Object.assign({}, grid);
+        let posGrid = posState;
+        let newGrid = grid;
 
 
         let gridSize = Object.keys(grid).length;
 
         console.log('posGrid pre solve');
-        console.log(posGrid);
+        console.log(JSON.parse(JSON.stringify(posGrid)));
         //do this untill solved or deemed unsolvable
 
         //filling in known values, replaces the possibility array with an array with just the filled in value
@@ -239,10 +239,7 @@ let gridFunc = {
         for (let j = 0; j < gridSize; j++) {
             if (newGrid[j].answer !== '') {
                 for (let k = 0; k < gridSize; k++) {
-                    if (k === 28) {
-                        console.log(`k check 1 j: ${j}`);
-                        console.log(JSON.parse(JSON.stringify(posGrid)));
-                    };
+                    
                     //reduces possibility array elements, comparing blocks in the same row/col/square
                     if (newGrid[j].col === newGrid[k].col || newGrid[j].row === newGrid[k].row || newGrid[j].square === newGrid[k].square) {
                         let index = posGrid[k].possi.indexOf(newGrid[j].answer);
@@ -251,19 +248,13 @@ let gridFunc = {
                             posGrid[k].possi.splice(index, 1);
                         }
                     }
-                    if (k === 28) {
-                        console.log(`k check 2 J: ${j}`);
-                        console.log(JSON.parse(JSON.stringify(posGrid)));
-                    };
+                    
 
                 }
             }
             //checks to so see if its the only valid location of a number
             //If the number cant go anywhere else it will set it to that number
-            if (j === 28) {
-                console.log("gridsolve check 2");
-                console.log(JSON.parse(JSON.stringify(posGrid)));
-            };
+            
             let compArray = gridFunc.compArrayBuilder('col', newGrid[j].col, posGrid);
             //checking numbers 1-9
 
@@ -287,10 +278,7 @@ let gridFunc = {
                     }
                 }
             }
-            if (j === 28) {
-                console.log("gridsolve check 3");
-                console.log(JSON.parse(JSON.stringify(posGrid)));
-            };
+            
             compArray = gridFunc.compArrayBuilder('row', newGrid[j].row, posGrid);
             //checking numbers 1-9
 
@@ -314,10 +302,7 @@ let gridFunc = {
                     }
                 }
             }
-            if (j === 28) {
-                console.log("gridsolve check 4");
-                console.log(JSON.parse(JSON.stringify(posGrid)));
-            };
+            
             compArray = gridFunc.compArrayBuilder('square', newGrid[j].square, posGrid);
             //checking numbers 1-9
 
@@ -341,19 +326,23 @@ let gridFunc = {
                     }
                 }
             }
-            if (j === 28) {
-                console.log("gridsolve check 1");
-                console.log(JSON.parse(JSON.stringify(posGrid)));
-            };
+            
         }
 
         //posGrid = this.deepPossiReduce(posGrid);
-        stateHelper(newGrid);
+        stateHelper(newGrid, posGrid);
         //this.setState({posArray: posGrid});
 
         //TODO refactor this properly
         //return newGrid;
         return posGrid;
+    },
+    possiSum(posGrid){
+        let sum = 0;
+        for(let i = 0; i < 81; i++){
+            sum = sum + posGrid[i].possi.length;
+        }
+        return sum;
     },
     possiRebuild(posGrid, startID, order) {
         //let newPossi = [1,2,3,4,5,6,7,8,9];
