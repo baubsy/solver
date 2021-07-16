@@ -33,8 +33,23 @@ class InputGrid extends React.Component {
     this.setState({ inputGrid: gridFunc.gridSolve(this.state.inputGrid, this.state.posArray, this.stateHelper) })
   };
   debugClick = (event) => {
+    /*
     this.setState({posArray: gridFunc.recReduce(this.state.posArray, 8)})
     console.log(this.state.posArray);
+    */
+    let reducedGrid = JSON.parse(JSON.stringify(this.state.posArray));
+    //console.log("newsolve reduced grid");
+    //console.log(reducedGrid);
+    for(let i = 0; i < this.state.posArray.length; i++){
+      if(this.state.posArray[i].answer != undefined){
+        reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
+      }
+    };
+    let order = gridFunc.leastToMost(reducedGrid);
+    console.log("reduced Grid");
+    console.log(reducedGrid);
+    console.log("order");
+    console.log(order);
   };
   handleUndo = () => {
     //Do a undo history that it steps back through, will fix problem
@@ -97,12 +112,23 @@ class InputGrid extends React.Component {
     //console.log("newsolve reduced grid");
     //console.log(reducedGrid);
     for(let i = 0; i < this.state.posArray.length; i++){
-      if(this.state.posArray[i].answer > 0){
+      if(this.state.posArray[i].answer != undefined){
         reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
       }
     }
     console.log("new solve reduced grid");
-    console.log(reducedGrid);
+    //TODO change gridsolve to return pos grid, embrace hybrid approach?
+
+    /*
+    reducedGrid = gridFunc.gridSolve(this.state.inputGrid, reducedGrid, this.stateHelper);
+    //reducedGrid = gridFunc.recReduce(reducedGrid, 0);
+    for(let i = 0; i < this.state.posArray.length; i++){
+      if(this.state.posArray[i].answer != undefined){
+        reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, reducedGrid[i].answer)));
+      }
+    }
+    */
+    console.log(JSON.parse(JSON.stringify(reducedGrid)));
     //this.setState({posArray: reducedGrid});
     this.setState({posArray: reducedGrid, inputGrid: gridFunc.recSolve(reducedGrid, 0)});
     //console.log(this.state.inputGrid);
