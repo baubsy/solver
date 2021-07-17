@@ -38,12 +38,14 @@ class InputGrid extends React.Component {
     //this.setState({previousGrid: newGrid, previousArray: posGrid});
     let answer = parseInt(event.target.value, 10);
 
+    if(answer > 0 && answer < 10){
     posGrid[id].solved = 1;
     posGrid[id].userInputted = true;
     posGrid[id].answer = answer;
     newGrid[id].answer = answer;
     posGrid[id].possi.splice(0, posGrid[id].possi.length, [newGrid[id].answer]);
     this.setState({ posArray: posGrid, inputGrid: newGrid });
+  };
 
   }
   rowBuilder = (startId) => {
