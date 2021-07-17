@@ -165,6 +165,10 @@ let gridFunc = {
     //crosses off possible answers based on known values if blocks share a square/col/or row
     possiReduce(id, grid, answer, startID = 0, order) {
         //goes by the order provided and cross of possibilites of subsequent squares where approiate based on answer
+        if(startID === 1){
+            console.log("order inside reduce startID 1");
+            console.log(order);
+        }
         if (order === undefined) {
             order = [];
             for (let d = 0; d < 81; d++) {
@@ -173,10 +177,10 @@ let gridFunc = {
         };
         let newGrid = grid;
         for (let j = startID; j < 81; j++) {
-            if (grid[order[j]].col === grid[order[id]].col || grid[order[j]].row === grid[order[id]].row || grid[order[j]].square === grid[order[id]].square) {
+            if (grid[order[j]].col === grid[id].col || grid[order[j]].row === grid[id].row || grid[order[j]].square === grid[id].square) {
                 let index = grid[order[j]].possi.indexOf(answer);
                 //if the value already exists in this row/col/square it crosses it off the list for this block
-                if (index > -1 && j !== id) {
+                if (index > -1 && order[j] !== id) {
                     newGrid[order[j]].possi.splice(index, 1);
                 }
             }
@@ -188,10 +192,15 @@ let gridFunc = {
         let newGrid = posGrid;
         for (let i = 0; i < 81; i++) {
             if (newGrid[order[i]].answer !== undefined) {
-                newGrid = this.possiReduce(i, newGrid, newGrid[order[i]].answer, startID + 1, order);
+                newGrid = this.possiReduce(order[i], newGrid, newGrid[order[i]].answer, startID + 1, order);
             }
 
         };
+        /* for (let i = 0; i < 81; i++) {
+        if (this.state.posArray[i].answer !== undefined) {
+          reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, reducedGrid[i].answer)));
+        };
+      };*/
         return newGrid;
     },
     solveCheck(posGrid) {
@@ -229,6 +238,8 @@ let gridFunc = {
                 newGrid[i].answer = posGrid[i].possi[0];
                 posGrid[i].solved = 1;
                 posGrid[i].answer = posGrid[i].possi[0];
+                posGrid[i].possi.splice(0, posGrid[i].possi.length, [newGrid[i].answer]);
+                posGrid[i].userInputted = true;
             }
 
         }
@@ -275,6 +286,7 @@ let gridFunc = {
                             posGrid[j].answer = t;
                             posGrid[j].solved = 1;
                             posGrid[j].possi.splice(0, posGrid[j].possi.length, [newGrid[j].answer]);
+                            posGrid[j].userInputted = true;
                         }
                     }
                 }
@@ -299,6 +311,8 @@ let gridFunc = {
                             newGrid[j].answer = t;
                             posGrid[j].solved = 1;
                             posGrid[j].answer = t;
+                            posGrid[j].possi.splice(0, posGrid[j].possi.length, [newGrid[j].answer]);
+                            posGrid[j].userInputted = true;
                         }
                     }
                 }
@@ -321,6 +335,8 @@ let gridFunc = {
                             newGrid[j].answer = t;
                             posGrid[j].solved = 1;
                             posGrid[j].answer = t;
+                            posGrid[j].possi.splice(0, posGrid[j].possi.length, [newGrid[j].answer]);
+                            posGrid[j].userInputted = true;
                         }
                     }
                 }
@@ -419,6 +435,7 @@ let gridFunc = {
                 }
             }
         } else if (posGrid[order[startID]].userInputted === true) {
+            console.log(order);
             returnGrid = this.recReduce(returnGrid, startID, order);
             return this.recSolve(returnGrid, startID + 1, order);
 

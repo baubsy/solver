@@ -14,6 +14,12 @@ class InputGrid extends React.Component {
   onClick = (event) => {
     console.log("onclick debug");
     console.log(this.state.posArray);
+    let reducedGrid = this.state.posArray;
+    for (let i = 0; i < 81; i++) {
+      if (this.state.posArray[i].answer !== undefined) {
+        reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, reducedGrid[i].answer)));
+      };
+    };
     gridFunc.gridSolve(this.state.inputGrid, this.state.posArray, this.stateHelper);
   };
   debugClick = (event) => {
@@ -59,17 +65,18 @@ class InputGrid extends React.Component {
     return hmtlTable;
   }
   newSolve = () => {
-    let reducedGrid = JSON.parse(JSON.stringify(this.state.posArray));
+    let reducedGrid = this.state.posArray;
+    let inGrid = this.state.inputGrid;
 
     let sum = gridFunc.possiSum(reducedGrid);
     let newSum = -1;
 
     do {
       sum = newSum;
-      reducedGrid = gridFunc.gridSolve(this.state.inputGrid, reducedGrid, this.stateHelper);
-      for (let i = 0; i < this.state.posArray.length; i++) {
+      reducedGrid = gridFunc.gridSolve(inGrid, reducedGrid, this.stateHelper);
+      for (let i = 0; i < 81; i++) {
         if (this.state.posArray[i].answer !== undefined) {
-          reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
+          reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, reducedGrid[i].answer)));
         };
       };
       //reducedGrid = gridFunc.deepPossiReduce(reducedGrid, "col");
@@ -80,12 +87,15 @@ class InputGrid extends React.Component {
     let order = gridFunc.leastToMost(reducedGrid);
     console.log("order");
     console.log(order);
-    this.setState({ posArray: reducedGrid, inputGrid: gridFunc.recSolve(reducedGrid, 0, order) });
+    console.log("posGrid before rec solve");
+    console.log(JSON.parse(JSON.stringify(reducedGrid)))
+    reducedGrid = gridFunc.recSolve(reducedGrid, 0, order);
+    this.setState({ posArray: reducedGrid, inputGrid: reducedGrid });
     //console.log(this.state.inputGrid);
   };
   gridPrint = () =>{
     let reducedGrid = this.state.posArray;
-    for (let i = 0; i < this.state.posArray.length; i++) {
+    for (let i = 0; i < 81; i++) {
       if (this.state.posArray[i].answer !== undefined) {
         reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
       };
@@ -93,6 +103,12 @@ class InputGrid extends React.Component {
     this.setState({posArray: reducedGrid});
     console.log(reducedGrid);
   }
+  gridCopy = () =>{
+    this.setState({pgridCopy: JSON.parse(JSON.stringify(this.state.posArray)), igridCopy: JSON.parse(JSON.stringify(this.state.inputGrid))});
+  };
+  gridPaste = () =>{
+    this.setState({inputGrid: this.state.igridCopy, posArray: this.state.prgridCopy})
+  };
   render() {
     console.log("render test");
     return (
@@ -110,6 +126,8 @@ class InputGrid extends React.Component {
               <button type="button" onClick={this.handleClear}>Clear</button>
               <button type="button" onClick={this.newSolve}>Rec Solve</button>
               <button type="button" onClick={this.gridPrint}>Grid Print</button>
+              <button type="button" onClick={this.gridCopy}>copy grid</button>
+              <button type="button" onClick={this.gridPaste}>paste grid</button>
             </div>
           </div>
         </form>
