@@ -126,28 +126,29 @@ let gridFunc = {
         return solved;
     },
 
-    deepPossiReduce(posArray) {
+    deepPossiReduce(posArray, type) {
+        //type is "row" or "col"
         let posGrid = posArray;
 
 
         for (let d = 0; d < 81; d++) {
             let sqArray = gridFunc.compArrayBuilder('square', posGrid[d].square, posGrid);
-            console.log(JSON.parse(JSON.stringify(sqArray)));
+            //console.log(JSON.parse(JSON.stringify(sqArray)));
             for (let i = 1; i < 10; i++) {
                 if (this.compArrayCheck(i, sqArray) === false) {
                     let blocked = 0; //tracks if the possiblites in the square blocks certain answers in rows/cols
                     sqArray.forEach(function (sq) {
                         //CHECK if I is present in square already!!!!!!!!!!!!
-                        if (sq.possi.indexOf(i) > -1 && posGrid[d].col !== sq.col) {
+                        if (sq.possi.indexOf(i) > -1 && posGrid[d][type] !== sq[type]) {
                             blocked = 1;
                             //console.log("blok test");
                         }
                     })
                     //console.log("block test" + d + blocked);
                     if (blocked === 0) {
-                        console.log("block 2");
+                        //console.log("block 2");
                         for (let k = 0; k < 81; k++) {
-                            if (posGrid[d].col === posGrid[k].col && posGrid[d].square !== posGrid[k].square) {
+                            if (posGrid[d][type] === posGrid[k][type] && posGrid[d].square !== posGrid[k].square) {
                                 if (posGrid[k].possi.indexOf(i) > -1 && posGrid[k].possi.length > 1) {
                                     //FIX butchering posGrid somehow, see CHECk on line 129
                                     let index = posGrid[k].possi.indexOf(i);
@@ -212,8 +213,8 @@ let gridFunc = {
 
         let gridSize = Object.keys(grid).length;
 
-        console.log('posGrid pre solve');
-        console.log(JSON.parse(JSON.stringify(posGrid)));
+        //console.log('posGrid pre solve');
+        //console.log(JSON.parse(JSON.stringify(posGrid)));
         //do this untill solved or deemed unsolvable
 
         //filling in known values, replaces the possibility array with an array with just the filled in value
@@ -231,8 +232,8 @@ let gridFunc = {
             }
 
         }
-        console.log("gridsolve check 1");
-        console.log(JSON.parse(JSON.stringify(posGrid)));
+        //console.log("gridsolve check 1");
+        //console.log(JSON.parse(JSON.stringify(posGrid)));
         //comparing each grid element to each other
 
         for (let j = 0; j < gridSize; j++) {
@@ -273,6 +274,7 @@ let gridFunc = {
                             newGrid[j].answer = t;
                             posGrid[j].answer = t;
                             posGrid[j].solved = 1;
+                            posGrid[j].possi.splice(0, posGrid[j].possi.length, [newGrid[j].answer]);
                         }
                     }
                 }
@@ -325,6 +327,8 @@ let gridFunc = {
             }
 
         }
+        console.log("post grid solve check");
+        console.log(JSON.parse(JSON.stringify(posGrid)));
         stateHelper(newGrid, posGrid);
         return posGrid;
     },
@@ -340,6 +344,9 @@ let gridFunc = {
         //rebuilds possibility arrays in subsequent blocks after a back step changes things
         let newGrid = posGrid;
         for (let i = startID; i < 81; i++) {
+            if(order[i] === 70){
+
+            }
             if (newGrid[order[i]].userInputted === false) {
                 newGrid[order[i]].possi.splice(0, newGrid[order[i]].possi.length);
                 for (let t = 1; t < 10; t++) {
@@ -380,7 +387,9 @@ let gridFunc = {
     recSolve(posGrid, startID, order, backstep) {
         //brute forces the grid recursively, following the order of indexs in order
         let returnGrid = posGrid;
-
+        if(order[startID] === 70){
+            console.log(JSON.parse(JSON.stringify(posGrid)))
+        }
         if (startID === 80) {
             //the base case
             if (returnGrid[order[80]].possi.length === 1) {

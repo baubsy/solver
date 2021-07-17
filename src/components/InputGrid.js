@@ -18,7 +18,7 @@ class InputGrid extends React.Component {
   };
   debugClick = (event) => {
     let debugGrid = JSON.parse(JSON.stringify(this.state.posArray));
-    console.log(gridFunc.deepPossiReduce(debugGrid));
+    console.log(debugGrid);
   };
   handleClear = () => {
     this.setState({ inputGrid: gridFunc.arrayBuilder('answer'), posArray: gridFunc.arrayBuilder() });
@@ -72,11 +72,14 @@ class InputGrid extends React.Component {
           reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
         };
       };
+      //reducedGrid = gridFunc.deepPossiReduce(reducedGrid, "col");
+      //reducedGrid = gridFunc.deepPossiReduce(reducedGrid, "row");
       newSum = gridFunc.possiSum(reducedGrid);
     } while (sum !== newSum)
 
     let order = gridFunc.leastToMost(reducedGrid);
-
+    console.log("order");
+    console.log(order);
     this.setState({ posArray: reducedGrid, inputGrid: gridFunc.recSolve(reducedGrid, 0, order) });
     //console.log(this.state.inputGrid);
   };
@@ -88,7 +91,7 @@ class InputGrid extends React.Component {
       };
     };
     this.setState({posArray: reducedGrid});
-    console.log(reducedGrid[0]["possi"]);
+    console.log(reducedGrid);
   }
   render() {
     console.log("render test");
