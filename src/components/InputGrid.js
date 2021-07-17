@@ -17,23 +17,8 @@ class InputGrid extends React.Component {
     gridFunc.gridSolve(this.state.inputGrid, this.state.posArray, this.stateHelper);
   };
   debugClick = (event) => {
-    /*
-    this.setState({posArray: gridFunc.recReduce(this.state.posArray, 8)})
-    console.log(this.state.posArray);
-    */
-    let reducedGrid = JSON.parse(JSON.stringify(this.state.posArray));
-    //console.log("newsolve reduced grid");
-    //console.log(reducedGrid);
-    for (let i = 0; i < this.state.posArray.length; i++) {
-      if (this.state.posArray[i].answer !== undefined) {
-        reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
-      }
-    };
-    let order = gridFunc.leastToMost(reducedGrid);
-    console.log("reduced Grid");
-    console.log(reducedGrid);
-    console.log("order");
-    console.log(order);
+    let debugGrid = JSON.parse(JSON.stringify(this.state.posArray));
+    console.log(gridFunc.deepPossiReduce(debugGrid));
   };
   handleClear = () => {
     this.setState({ inputGrid: gridFunc.arrayBuilder('answer'), posArray: gridFunc.arrayBuilder() });
@@ -95,6 +80,16 @@ class InputGrid extends React.Component {
     this.setState({ posArray: reducedGrid, inputGrid: gridFunc.recSolve(reducedGrid, 0, order) });
     //console.log(this.state.inputGrid);
   };
+  gridPrint = () =>{
+    let reducedGrid = this.state.posArray;
+    for (let i = 0; i < this.state.posArray.length; i++) {
+      if (this.state.posArray[i].answer !== undefined) {
+        reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
+      };
+    };
+    this.setState({posArray: reducedGrid});
+    console.log(reducedGrid[0]["possi"]);
+  }
   render() {
     console.log("render test");
     return (
@@ -111,6 +106,7 @@ class InputGrid extends React.Component {
               <button type="button" onClick={this.debugClick}>debug</button>
               <button type="button" onClick={this.handleClear}>Clear</button>
               <button type="button" onClick={this.newSolve}>Rec Solve</button>
+              <button type="button" onClick={this.gridPrint}>Grid Print</button>
             </div>
           </div>
         </form>

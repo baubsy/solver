@@ -113,11 +113,17 @@ let gridFunc = {
                     console.log("square error");
                     break;
             };
-
-            //console.log('test2');
         })
-
         return posArray;
+    },
+    compArrayCheck(answer, compArray) {
+        let solved = false;
+        for (let i = 0; i < compArray.length; i++) {
+            if (compArray[i].answer === answer) {
+                solved = true;
+            }
+        }
+        return solved;
     },
 
     deepPossiReduce(posArray) {
@@ -125,29 +131,28 @@ let gridFunc = {
 
 
         for (let d = 0; d < 81; d++) {
-
-
-            let sqArray = gridFunc.compArrayBuilder('square', d, posGrid);
+            let sqArray = gridFunc.compArrayBuilder('square', posGrid[d].square, posGrid);
+            console.log(JSON.parse(JSON.stringify(sqArray)));
             for (let i = 1; i < 10; i++) {
-                let blocked = 0; //tracks if the possiblites in the square blocks certain answers in rows/cols
-                sqArray.forEach(function (sq) {
-                    if (i === 7 && sq.square === 0) {
-                        console.log(sq);
-                    }
-                    if (sq.possi.indexOf(i) > -1 && posGrid[d].col !== sq.col && sq.id !== posGrid[d].id) {
-                        blocked = 1;
-                        console.log("blok test");
-                    }
-                })
-                console.log("block test" + d + blocked);
-                if (blocked === 0) {
-                    console.log("block 2");
-                    for (let k = 0; k < 81; k++) {
-                        if (posGrid[d].col === posGrid[k].col && posGrid[d].square !== posGrid[k].square) {
-                            if (posGrid[k].possi.indexOf(i) > -1 && posGrid[k].possi.length > 1) {
-                                //FIX butchering posGrid somehow
-                                let index = posGrid[k].possi.indexOf(i);
-                                posGrid[k].possi.splice(index, 1)
+                if (this.compArrayCheck(i, sqArray) === false) {
+                    let blocked = 0; //tracks if the possiblites in the square blocks certain answers in rows/cols
+                    sqArray.forEach(function (sq) {
+                        //CHECK if I is present in square already!!!!!!!!!!!!
+                        if (sq.possi.indexOf(i) > -1 && posGrid[d].col !== sq.col) {
+                            blocked = 1;
+                            //console.log("blok test");
+                        }
+                    })
+                    //console.log("block test" + d + blocked);
+                    if (blocked === 0) {
+                        console.log("block 2");
+                        for (let k = 0; k < 81; k++) {
+                            if (posGrid[d].col === posGrid[k].col && posGrid[d].square !== posGrid[k].square) {
+                                if (posGrid[k].possi.indexOf(i) > -1 && posGrid[k].possi.length > 1) {
+                                    //FIX butchering posGrid somehow, see CHECk on line 129
+                                    let index = posGrid[k].possi.indexOf(i);
+                                    posGrid[k].possi.splice(index, 1)
+                                }
                             }
                         }
                     }
@@ -177,7 +182,7 @@ let gridFunc = {
         }
         return newGrid;
     },
-    //function to help reduce possibility arrays for the recSolve function. starts form a block and moves down
+    //function to help reduce possibility arrays for the recSolve function. starts from order[startID] and moves down
     recReduce(posGrid, startID, order) {
         let newGrid = posGrid;
         for (let i = 0; i < 81; i++) {
@@ -307,11 +312,9 @@ let gridFunc = {
                         compArray.forEach(function (possiArray) {
                             if (possiArray.id !== newGrid[j].id && possiArray.possi.indexOf(t) === -1) {
                                 //Avoiding looking at current block for comparisons/makes sure the answer(t) isn't in a differnt spot in the column
-
                                 counter++;
                             }
                         })
-
                         if (counter === 8 && newGrid[j].answer === '') {
                             newGrid[j].answer = t;
                             posGrid[j].solved = 1;
@@ -322,7 +325,6 @@ let gridFunc = {
             }
 
         }
-
         stateHelper(newGrid, posGrid);
         return posGrid;
     },
@@ -373,8 +375,6 @@ let gridFunc = {
                 }
             };
         }
-
-
         return order;
     },
     recSolve(posGrid, startID, order, backstep) {
