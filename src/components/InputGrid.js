@@ -2,25 +2,9 @@ import React from 'react';
 import gridFunc from './gridFunc.js';
 
 class InputGrid extends React.Component {
-  state = { inputGrid: gridFunc.arrayBuilder('answer'), posArray: gridFunc.arrayBuilder(), previousGrid: gridFunc.arrayBuilder('answer'), previousArray: gridFunc.arrayBuilder() };
+  state = { inputGrid: gridFunc.arrayBuilder('answer'), posArray: gridFunc.arrayBuilder() };
 
   //function to solve grid as much as possible
-  fullSolve = () => {
-    let posGrid = JSON.parse(JSON.stringify(this.state.posArray));
-    let escapeCounter = 0;
-    let solved = 0;
-    do {
-      //check if solved with function
-      solved = gridFunc.solveCheck(posGrid);
-      escapeCounter++;
-
-      this.setState({ inputGrid: gridFunc.gridSolve(this.state.inputGrid, this.state.posArray, this.stateHelper) })
-
-    } while (escapeCounter < 20 && solved === 0);
-    if(escapeCounter >= 20){
-      console.log("full solve impossible")
-    }
-  };
   stateHelper = (inGrid, pGrid) => {
     this.setState({ inputGrid: inGrid, posArray: pGrid });
     //console.log("state helper");
@@ -40,8 +24,8 @@ class InputGrid extends React.Component {
     let reducedGrid = JSON.parse(JSON.stringify(this.state.posArray));
     //console.log("newsolve reduced grid");
     //console.log(reducedGrid);
-    for(let i = 0; i < this.state.posArray.length; i++){
-      if(this.state.posArray[i].answer !== undefined){
+    for (let i = 0; i < this.state.posArray.length; i++) {
+      if (this.state.posArray[i].answer !== undefined) {
         reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
       }
     };
@@ -51,19 +35,11 @@ class InputGrid extends React.Component {
     console.log("order");
     console.log(order);
   };
-  handleUndo = () => {
-    //Do a undo history that it steps back through, will fix problem
-    //simple 1 step undo, disable undo button until another change is made
-    console.log("undo");
-    this.setState({ inputGrid: this.state.previousGrid, posArray: this.state.previousArray });
-    console.log(this.state.inputGrid);
-    //this.setState({posArray: this.state.previousArray});
-    console.log(this.state.posArray);
-
+  handleClear = () => {
+    this.setState({ inputGrid: gridFunc.arrayBuilder('answer'), posArray: gridFunc.arrayBuilder() });
   };
   handleChange = (event, id) => {
     event.persist();
-    console.log("udate test");
     let newGrid = this.state.inputGrid;
     let posGrid = this.state.posArray;
 
@@ -75,19 +51,9 @@ class InputGrid extends React.Component {
     posGrid[id].userInputted = true;
     posGrid[id].answer = answer;
     newGrid[id].answer = answer;
-    console.log(answer);
     posGrid[id].possi.splice(0, posGrid[id].possi.length, [newGrid[id].answer]);
-    console.log(posGrid);
+    this.setState({ posArray: posGrid, inputGrid: newGrid });
 
-    //this.setState({ previousGrid: this.state.inputGrid, previousArray: this.state.posArray });
-    //TODO breaking old save by commenting out possiReduce here to make recSolve work.
-    this.setState({ 
-      previousGrid: this.state.inputGrid,
-      previousArray: this.state.posArray,
-      //posArray: gridFunc.possiReduce(id, posGrid, answer),
-      posArray: posGrid,
-      inputGrid: newGrid });
-    //this.setState({ posArray: gridFunc.possiReduce(id, posGrid, answer), inputGrid: newGrid });
   }
   rowBuilder = (startId) => {
     let row = [];
@@ -109,43 +75,24 @@ class InputGrid extends React.Component {
   }
   newSolve = () => {
     let reducedGrid = JSON.parse(JSON.stringify(this.state.posArray));
-    //console.log("newsolve reduced grid");
-    //console.log(reducedGrid);
-    
+
     let sum = gridFunc.possiSum(reducedGrid);
     let newSum = -1;
 
-    do{
+    do {
       sum = newSum;
       reducedGrid = gridFunc.gridSolve(this.state.inputGrid, reducedGrid, this.stateHelper);
-      for(let i = 0; i < this.state.posArray.length; i++){
-        if(this.state.posArray[i].answer !== undefined){
+      for (let i = 0; i < this.state.posArray.length; i++) {
+        if (this.state.posArray[i].answer !== undefined) {
           reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, this.state.posArray[i].answer)));
         };
       };
       newSum = gridFunc.possiSum(reducedGrid);
-    }while(sum !== newSum)
-    /*
-    console.log("new solve reduced grid before gridSolve");
-    //TODO change gridsolve to return pos grid, embrace hybrid approach?
-    console.log(JSON.parse(JSON.stringify(reducedGrid)));
-    
-    reducedGrid = gridFunc.gridSolve(this.state.inputGrid, reducedGrid, this.stateHelper);
-    console.log("after grid solve");
-    console.log(JSON.parse(JSON.stringify(reducedGrid)));
-    //reducedGrid = gridFunc.recReduce(reducedGrid, 0);
-    for(let i = 0; i < this.state.posArray.length; i++){
-      if(this.state.posArray[i].answer != undefined){
-        reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, reducedGrid[i].answer)));
-      }
-    }
-    */
+    } while (sum !== newSum)
+
     let order = gridFunc.leastToMost(reducedGrid);
-    //console.log(JSON.parse(JSON.stringify(reducedGrid)));
-    //console.log("order");
-    //console.log(order);
-    //this.setState({posArray: reducedGrid});
-    this.setState({posArray: reducedGrid, inputGrid: gridFunc.recSolve(reducedGrid, 0, order)});
+
+    this.setState({ posArray: reducedGrid, inputGrid: gridFunc.recSolve(reducedGrid, 0, order) });
     //console.log(this.state.inputGrid);
   };
   render() {
@@ -162,8 +109,7 @@ class InputGrid extends React.Component {
             <div id="btns">
               <button type="button" onClick={this.onClick}>Solve!</button>
               <button type="button" onClick={this.debugClick}>debug</button>
-              <button type="button" onClick={this.fullSolve}>Full Solve</button>
-              <button type="button" onClick={this.handleUndo}>Undo</button>
+              <button type="button" onClick={this.handleClear}>Clear</button>
               <button type="button" onClick={this.newSolve}>Rec Solve</button>
             </div>
           </div>
