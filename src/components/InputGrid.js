@@ -79,8 +79,8 @@ class InputGrid extends React.Component {
           reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, reducedGrid[i].answer)));
         };
       };
-      //reducedGrid = gridFunc.deepPossiReduce(reducedGrid, "col");
-      //reducedGrid = gridFunc.deepPossiReduce(reducedGrid, "row");
+      reducedGrid = gridFunc.deepPossiReduce(reducedGrid, "col");
+      reducedGrid = gridFunc.deepPossiReduce(reducedGrid, "row");
       newSum = gridFunc.possiSum(reducedGrid);
     } while (sum !== newSum)
 
