@@ -100,7 +100,7 @@ class InputGrid extends React.Component {
     return (
       <div>
         <form autoComplete="off">
-          <table id="inputTable" cellspacing="0" cellpadding="0">
+          <table id="inputTable" cellSpacing="0" cellPadding="0">
             <tbody>
               {this.renderHelper()}
             </tbody>
