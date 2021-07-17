@@ -386,6 +386,7 @@ let gridFunc = {
     },
     recSolve(posGrid, startID, order, backstep) {
         //brute forces the grid recursively, following the order of indexs in order
+        //web sudoku evil puzzle 3431478100 causes werid issues
         let returnGrid = posGrid;
         if(order[startID] === 70){
             console.log(JSON.parse(JSON.stringify(posGrid)))
