@@ -1,4 +1,4 @@
-import React from 'react';
+//import React from 'react';
 
 let gridFunc = {
     test() {
@@ -59,7 +59,7 @@ let gridFunc = {
             };
         } else {
             for (let d = 0; d < 81; d++) {
-                posArray.push({ id: d, row: null, col: null, square: null, possi: [1, 2, 3, 4, 5, 6, 7, 8, 9], solved: 0 }) //DEBUG value remove!
+                posArray.push({ id: d, row: null, col: null, square: null, possi: [1, 2, 3, 4, 5, 6, 7, 8, 9], solved: 0, userInputted: false }) //DEBUG value remove!
             }
         }
 
@@ -157,19 +157,39 @@ let gridFunc = {
         return posGrid;
     },
     //crosses off possible answers based on known values if blocks share a square/col/or row
-    possiReduce(id, grid, answer) {
-        let newGrid = Object.assign({}, grid);;
-        for (let j = 0; j < 81; j++) {
-            if (grid[j].col === grid[id].col || grid[j].row === grid[id].row || grid[j].square === grid[id].square) {
-                let index = grid[j].possi.indexOf(answer);
+    possiReduce(id, grid, answer, startID = 0, order) {
+        //console.log("possi reduce grid");
+        //console.log(grid);
+        //let newGrid = JSON.parse(JSON.stringify(grid));
+        if (order === undefined) {
+            order = [];
+            for (let d = 0; d < 81; d++) {
+                order.push(d);
+            }
+        };
+        let newGrid = grid;
+        for (let j = startID; j < 81; j++) {
+            if (grid[order[j]].col === grid[order[id]].col || grid[order[j]].row === grid[order[id]].row || grid[order[j]].square === grid[order[id]].square) {
+                let index = grid[order[j]].possi.indexOf(answer);
                 //if the value already exists in this row/col/square it crosses it off the list for this block
-                if (index > -1) {
-                    newGrid[j].possi.splice(index, 1);
+                if (index > -1 && j !== id) {
+                    newGrid[order[j]].possi.splice(index, 1);
                 }
             }
         }
-        console.log("possireduce return posgrid");
-        console.log(newGrid);
+        //console.log("possireduce return posgrid");
+        //console.log(newGrid);
+        return newGrid;
+    },
+    //function to help reduce possibility arrays for the recSolve function. starts form a block and moves down
+    recReduce(posGrid, startID, order) {
+        let newGrid = posGrid;
+        for (let i = 0; i < 81; i++) {
+            if (newGrid[order[i]].answer !== undefined) {
+                newGrid = this.possiReduce(i, newGrid, newGrid[order[i]].answer, startID + 1, order);
+            }
+
+        };
         return newGrid;
     },
     //function to check if grid is SOLVED FIX/Start Here
@@ -187,14 +207,14 @@ let gridFunc = {
     gridSolve(grid, posState, stateHelper) {
         //let posGrid = JSON.parse(JSON.stringify(posState));
         //let newGrid = JSON.parse(JSON.stringify(grid));
-        let posGrid = Object.assign({}, posState);
-        let newGrid = Object.assign({}, grid);
-        
+        let posGrid = posState;
+        let newGrid = grid;
+
 
         let gridSize = Object.keys(grid).length;
 
         console.log('posGrid pre solve');
-        console.log(posGrid);
+        console.log(JSON.parse(JSON.stringify(posGrid)));
         //do this untill solved or deemed unsolvable
 
         //filling in known values, replaces the possibility array with an array with just the filled in value
@@ -208,27 +228,33 @@ let gridFunc = {
             if (posGrid[i].possi.length === 1 && posGrid[i].solved === 0) {
                 newGrid[i].answer = posGrid[i].possi[0];
                 posGrid[i].solved = 1;
+                posGrid[i].answer = posGrid[i].possi[0];
             }
 
         }
+        console.log("gridsolve check 1");
+        console.log(JSON.parse(JSON.stringify(posGrid)));
         //comparing each grid element to each other
 
         for (let j = 0; j < gridSize; j++) {
             if (newGrid[j].answer !== '') {
                 for (let k = 0; k < gridSize; k++) {
+                    
                     //reduces possibility array elements, comparing blocks in the same row/col/square
                     if (newGrid[j].col === newGrid[k].col || newGrid[j].row === newGrid[k].row || newGrid[j].square === newGrid[k].square) {
                         let index = posGrid[k].possi.indexOf(newGrid[j].answer);
                         //if the value already exists in this row/col/square it crosses it off the list for this block
-                        if (index > -1) {
+                        if (index > -1 && j !== k) {
                             posGrid[k].possi.splice(index, 1);
                         }
                     }
+                    
 
                 }
             }
             //checks to so see if its the only valid location of a number
             //If the number cant go anywhere else it will set it to that number
+            
             let compArray = gridFunc.compArrayBuilder('col', newGrid[j].col, posGrid);
             //checking numbers 1-9
 
@@ -246,11 +272,13 @@ let gridFunc = {
 
                         if (counter === 8 && newGrid[j].answer === '') {
                             newGrid[j].answer = t;
+                            posGrid[j].answer = t;
                             posGrid[j].solved = 1;
                         }
                     }
                 }
             }
+            
             compArray = gridFunc.compArrayBuilder('row', newGrid[j].row, posGrid);
             //checking numbers 1-9
 
@@ -269,10 +297,12 @@ let gridFunc = {
                         if (counter === 8 && newGrid[j].answer === '') {
                             newGrid[j].answer = t;
                             posGrid[j].solved = 1;
+                            posGrid[j].answer = t;
                         }
                     }
                 }
             }
+            
             compArray = gridFunc.compArrayBuilder('square', newGrid[j].square, posGrid);
             //checking numbers 1-9
 
@@ -296,39 +326,141 @@ let gridFunc = {
                     }
                 }
             }
+            
         }
 
         //posGrid = this.deepPossiReduce(posGrid);
-        stateHelper(newGrid);
+        stateHelper(newGrid, posGrid);
         //this.setState({posArray: posGrid});
+
+        //TODO refactor this properly
+        //return newGrid;
+        return posGrid;
+    },
+    possiSum(posGrid){
+        let sum = 0;
+        for(let i = 0; i < 81; i++){
+            sum = sum + posGrid[i].possi.length;
+        }
+        return sum;
+    },
+    possiRebuild(posGrid, startID, order) {
+        //let newPossi = [1,2,3,4,5,6,7,8,9];
+        //let newGrid = JSON.parse(JSON.stringify(posGrid));
+        let newGrid = posGrid;
+        for (let i = startID; i < 81; i++) {
+            if (newGrid[order[i]].userInputted === false) {
+                newGrid[order[i]].possi.splice(0, newGrid[order[i]].possi.length);
+                for (let t = 1; t < 10; t++) {
+                    newGrid[order[i]].possi.push(t);
+                }
+                newGrid[order[i]].answer = undefined;
+                newGrid[order[i]].solved = 0;
+            }
+
+            //newPossi.map(x => newGrid[startID].possi.push(x));
+        }
+        //console.log("inside possiRebuild");
+        //console.log(newGrid);
         return newGrid;
     },
-    recSolve(posGrid, startID, backstep){
-        //the last cell, the base case
-        let returnGrid = JSON.parse(JSON.stringify(posGrid));
-        if(backstep === true){
-            returnGrid[startID].possi.splice(0, 1);
+    doomCheck(posGrid, startID) {
+        let doom = false;
+        if (startID > 81) {
+            return doom;
         }
-        if(startID === 80){
-            if(returnGrid[80].possi.length === 1){
-                returnGrid[80].answer = returnGrid[80].possi[0];
-                return returnGrid;
-            } else{
-                return this.recSolve(returnGrid, startID - 1, true);
+        for (let i = startID; i < 81; i++) {
+            if (posGrid[i].possi.length === 0) {
+                doom = true;
+                return doom;
             }
-        } else if(returnGrid[startID].answer !== undefined){
-            //find first unsolved cell and assume first possibility is right, update possibility arrays
-        
-            //call recSolve on the remainder of the grid
-            return this.recSolve(returnGrid, startID + 1);
-        } else if(returnGrid[startID].answer === undefined){
-            returnGrid[startID].answer = returnGrid[startID].possi[0];
-            return this.recSolve(returnGrid, startID + 1);
-
-        } else{
-            console.log("recursion if break");
         }
-        
+        return doom;
+    },
+    leastToMost(posGrid) {
+        //returns an array of square id's with least possible answers to most
+        //TODO finish sort, make sure recReduce uses same order
+        let order = [];
+        for (let i = 1; i < 10; i++) {
+            for (let t = 0; t < 81; t++) {
+                if (posGrid[t].possi.length === i) {
+                    order.push(posGrid[t].id);
+                }
+            };
+        }
+
+
+        return order;
+    },
+    recSolve(posGrid, startID, order, backstep) {
+        //TODO repopulate and re reduce possi arrays after a back track
+        //the last cell, the base case
+        //let returnGrid = JSON.parse(JSON.stringify(this.possiRebuild(posGrid, startID + 1)));
+        let returnGrid = posGrid;
+        //returnGrid = this.recReduce(returnGrid, startID)
+
+        //console.log(`return grid for square ${startID}`);
+        //console.log(returnGrid);
+        if (startID === 80) {
+            if (returnGrid[order[80]].possi.length === 1) {
+                returnGrid[order[80]].answer = returnGrid[order[80]].possi[0];
+                return returnGrid;
+            } else {
+                return this.recSolve(returnGrid, startID - 1, order, true);
+                console.log("last square backstepped?");
+            }
+        } else if (backstep === true) {
+            //returnGrid = JSON.parse(JSON.stringify(this.possiRebuild(returnGrid, startID + 1)));
+            //console.log("rebuilt grid");
+            //console.log(returnGrid);
+            //returnGrid = this.recReduce(returnGrid, startID);
+            //console.log("reduced grid");s
+            //console.log(returnGrid);
+            if (posGrid[order[startID]].userInputted === true) {
+                return this.recSolve(returnGrid, startID - 1, order, true);
+            } else {
+                //backstep again if the only answer avaiable didn't work otherwise go further
+                //TODO properly remeber possI going forward but also refigure every subsequent square's following a backstep
+                returnGrid[order[startID]].possi.splice(0, 1);
+                //possi rebuild and reduce here
+                if (returnGrid[order[startID]].possi.length === 0) {
+                    return this.recSolve(returnGrid, startID - 1, order, true);
+                    //console.log("double backstep");
+                } else {
+                    returnGrid[order[startID]].answer = returnGrid[order[startID]].possi[0];
+                    returnGrid[order[startID]].solved = 1;
+                    //reduce possiblities here?
+                    //returnGrid = this.possiReduce(startID, returnGrid, returnGrid[startID].answer, startID + 1);
+                    returnGrid = this.possiRebuild(returnGrid, startID + 1, order);
+                    returnGrid = this.recReduce(returnGrid, startID, order);
+                    if (this.doomCheck(returnGrid, startID + 1) === true) {
+                        return this.recSolve(returnGrid, startID, order, true);
+                    };
+                    return this.recSolve(returnGrid, startID + 1, order);
+                }
+            }
+        } else if (posGrid[order[startID]].userInputted === true) {
+            returnGrid = this.recReduce(returnGrid, startID, order);
+            return this.recSolve(returnGrid, startID + 1, order);
+
+        } else if (posGrid[order[startID]].possi.length === 0) {
+            return this.recSolve(returnGrid, startID - 1, order, true);
+        } else if (posGrid[order[startID]].userInputted === false) {
+            returnGrid[order[startID]].answer = posGrid[order[startID]].possi[0];
+            returnGrid[order[startID]].solved = 1;
+            returnGrid = this.recReduce(returnGrid, startID, order);
+            if (this.doomCheck(returnGrid, startID + 1) === true) {
+                return this.recSolve(returnGrid, startID, order, true);
+            };
+            //reduce possiblities here?
+            //returnGrid = this.possiReduce(startID, returnGrid, returnGrid[startID].answer, startID + 1);
+            //returnGrid = this.recReduce(returnGrid, startID);
+            //returnGrid = this.possiReduce(startID, returnGrid, returnGrid[startID].answer, startID + 1)
+            return this.recSolve(returnGrid, startID + 1, order);
+        } else {
+            console.log("recusrion error");
+        }
+
 
         //pass up if a previous answer is unviable and move forward
     }
