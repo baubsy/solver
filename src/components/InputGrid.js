@@ -111,6 +111,35 @@ class InputGrid extends React.Component {
   gridPaste = () =>{
     this.setState({inputGrid: this.state.igridCopy, posArray: this.state.prgridCopy})
   };
+  recSolve2 = () =>{
+    let reducedGrid = this.state.posArray;
+    let inGrid = this.state.inputGrid;
+
+    let sum = gridFunc.possiSum(reducedGrid);
+    let newSum = -1;
+
+    do {
+      sum = newSum;
+      reducedGrid = gridFunc.gridSolve(inGrid, reducedGrid, this.stateHelper);
+      for (let i = 0; i < 81; i++) {
+        if (this.state.posArray[i].answer !== undefined) {
+          reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, reducedGrid[i].answer)));
+        };
+      };
+      reducedGrid = gridFunc.deepPossiReduce(reducedGrid, "col");
+      reducedGrid = gridFunc.deepPossiReduce(reducedGrid, "row");
+      newSum = gridFunc.possiSum(reducedGrid);
+    } while (sum !== newSum)
+
+    let order = gridFunc.leastToMost(reducedGrid);
+    console.log("order");
+    console.log(order);
+    console.log("posGrid before rec solve");
+    console.log(JSON.parse(JSON.stringify(reducedGrid)))
+    reducedGrid = gridFunc.whileSolve(reducedGrid, 0, order);
+    this.setState({ posArray: reducedGrid, inputGrid: reducedGrid });
+    //console.log(this.state.inputGrid);
+  }
   render() {
     console.log("render test");
     return (
@@ -130,6 +159,7 @@ class InputGrid extends React.Component {
               <button type="button" onClick={this.gridPrint}>Grid Print</button>
               <button type="button" onClick={this.gridCopy}>copy grid</button>
               <button type="button" onClick={this.gridPaste}>paste grid</button>
+              <button type="button" onClick={this.recSolve2}>While Solve</button>
             </div>
           </div>
         </form>

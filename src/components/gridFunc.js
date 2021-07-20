@@ -165,7 +165,7 @@ let gridFunc = {
     //crosses off possible answers based on known values if blocks share a square/col/or row
     possiReduce(id, grid, answer, startID = 0, order) {
         //goes by the order provided and cross of possibilites of subsequent squares where approiate based on answer
-        if(startID === 1){
+        if (startID === 1) {
             console.log("order inside reduce startID 1");
             console.log(order);
         }
@@ -360,7 +360,7 @@ let gridFunc = {
         //rebuilds possibility arrays in subsequent blocks after a back step changes things
         let newGrid = posGrid;
         for (let i = startID; i < 81; i++) {
-            if(order[i] === 70){
+            if (order[i] === 70) {
 
             }
             if (newGrid[order[i]].userInputted === false) {
@@ -400,12 +400,69 @@ let gridFunc = {
         }
         return order;
     },
+    whileSolve(posGrid, startID, order) {
+        let id = startID;
+        let returnGrid = posGrid;
+        let backstep = false;
+
+        do {
+            if (id < 0) {
+                console.log("backstepped too far");
+            }
+            if (id === 80) {
+                if (returnGrid[order[id]].possi.length === 1) {
+                    returnGrid[order[id]].answer = returnGrid[order[id]].possi[0];
+                    returnGrid[order[id]].solved = 1;
+                    id = id + 1;
+                }
+            }
+            else if (backstep === true) {
+                if (returnGrid[order[id]].userInputted === true) {
+                    id = id - 1;
+                    backstep = true;
+                } else {
+                    returnGrid[order[id]].possi.splice(0, 1);
+                    if (returnGrid[order[id]].possi.length === 0) {
+                        id = id - 1;
+                        backstep = true;
+                    } else {
+                        backstep = false;
+
+                        returnGrid[order[id]].answer = returnGrid[order[id]].possi[0];
+                        returnGrid[order[id]].solved = 1;
+                        returnGrid = this.possiRebuild(returnGrid, id + 1, order);
+                        returnGrid = this.recReduce(returnGrid, id, order);
+                        id = id + 1;
+                        if (this.doomCheck(returnGrid, id, order) === true) {
+                            backstep = true;
+                            id = id - 1;
+                        }
+                    }
+                }
+            } else if (returnGrid[order[id]].userInputted === true) {
+
+                returnGrid = this.recReduce(returnGrid, id, order);
+                id = id + 1;
+            } else if (returnGrid[order[id]].possi.length === 0) {
+                id = id - 1;
+                backstep = true;
+            } else if (returnGrid[order[id]].userInputted === false) {
+                returnGrid[order[id]].answer = returnGrid[order[id]].possi[0];
+                returnGrid[order[id]].solved = 1;
+                returnGrid = this.recReduce(returnGrid, id, order);
+                id = id + 1;
+                if (this.doomCheck(returnGrid, id, order)) {
+                    backstep = true;
+                    id = id - 1;
+                }
+            }
+        } while (id < 81);
+
+        return returnGrid;
+    },
     recSolve(posGrid, startID, order, backstep) {
         //brute forces the grid recursively, following the order of indexs in order
         let returnGrid = posGrid;
-        if(order[startID] === 70){
-            console.log(JSON.parse(JSON.stringify(posGrid)))
-        }
         if (startID === 80) {
             //the base case
             if (returnGrid[order[80]].possi.length === 1) {
