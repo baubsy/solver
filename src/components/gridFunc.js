@@ -14,11 +14,8 @@ let gridFunc = {
                 }
             }
         }
-
-
         return solved;
     },
-
     compArrayBuilder(type, id, grid) {
         //id being the row/col/square ID, 0-8
         //using 81 for grid size for now
@@ -45,10 +42,8 @@ let gridFunc = {
                 }
             }
         }
-
         return compArray;
     },
-
     arrayBuilder(type) {
         let posArray = [];
         //builds the structure of the array
@@ -62,7 +57,6 @@ let gridFunc = {
                 posArray.push({ id: d, row: null, col: null, square: null, possi: [1, 2, 3, 4, 5, 6, 7, 8, 9], solved: 0, userInputted: false });
             }
         };
-
         //assigns columns
         for (let i = 0; i < 9; i++) {
             for (let j = 0; j < 9; j++) {
@@ -71,16 +65,13 @@ let gridFunc = {
             };
         };
         //assigns rows
-
         for (let v = 0; v < 9; v++) {
             for (let t = 0; t < 9; t++) {
                 posArray[v * 9 + t].row = v;
             };
         };
-
         //assigins each object in the array what big square its in on the sudoku grid
         posArray.forEach(function (square) {
-
             switch (true) {
                 case square.row <= 2 && square.col <= 2:
                     square.square = 0;
@@ -125,15 +116,12 @@ let gridFunc = {
         }
         return solved;
     },
-
     deepPossiReduce(posArray, type) {
         //type is "row" or "col"
         let posGrid = posArray;
 
-
         for (let d = 0; d < 81; d++) {
             let sqArray = gridFunc.compArrayBuilder('square', posGrid[d].square, posGrid);
-            //console.log(JSON.parse(JSON.stringify(sqArray)));
             for (let i = 1; i < 10; i++) {
                 if (this.compArrayCheck(i, sqArray) === false) {
                     let blocked = 0; //tracks if the possiblites in the square blocks certain answers in rows/cols
@@ -141,16 +129,12 @@ let gridFunc = {
                         //CHECK if I is present in square already!!!!!!!!!!!!
                         if (sq.possi.indexOf(i) > -1 && posGrid[d][type] !== sq[type]) {
                             blocked = 1;
-                            //console.log("blok test");
                         }
                     })
-                    //console.log("block test" + d + blocked);
                     if (blocked === 0) {
-                        //console.log("block 2");
                         for (let k = 0; k < 81; k++) {
                             if (posGrid[d][type] === posGrid[k][type] && posGrid[d].square !== posGrid[k].square) {
                                 if (posGrid[k].possi.indexOf(i) > -1 && posGrid[k].possi.length > 1) {
-                                    //FIX butchering posGrid somehow, see CHECk on line 129
                                     let index = posGrid[k].possi.indexOf(i);
                                     posGrid[k].possi.splice(index, 1)
                                 }
@@ -165,10 +149,6 @@ let gridFunc = {
     //crosses off possible answers based on known values if blocks share a square/col/or row
     possiReduce(id, grid, answer, startID = 0, order) {
         //goes by the order provided and cross of possibilites of subsequent squares where approiate based on answer
-        if (startID === 1) {
-            console.log("order inside reduce startID 1");
-            console.log(order);
-        }
         if (order === undefined) {
             order = [];
             for (let d = 0; d < 81; d++) {
@@ -196,11 +176,6 @@ let gridFunc = {
             }
 
         };
-        /* for (let i = 0; i < 81; i++) {
-        if (this.state.posArray[i].answer !== undefined) {
-          reducedGrid = JSON.parse(JSON.stringify(gridFunc.possiReduce(i, reducedGrid, reducedGrid[i].answer)));
-        };
-      };*/
         return newGrid;
     },
     solveCheck(posGrid) {
@@ -218,21 +193,13 @@ let gridFunc = {
         //attempts to fill in blocks by looking at arrays of possibilites reduced by rules.
         let posGrid = posState;
         let newGrid = grid;
-
-
         let gridSize = Object.keys(grid).length;
-
-        //console.log('posGrid pre solve');
-        //console.log(JSON.parse(JSON.stringify(posGrid)));
-        //do this untill solved or deemed unsolvable
-
         //filling in known values, replaces the possibility array with an array with just the filled in value
         for (let i = 0; i < gridSize; i++) {
             if (newGrid[i].answer !== '') {
                 posGrid[i].solved = 1;
                 posGrid[i].possi.splice(0, posGrid[i].possi.length, [newGrid[i].answer])
             }
-
             //If a spot has only one possible answer left sets that as the answer
             if (posGrid[i].possi.length === 1 && posGrid[i].solved === 0) {
                 newGrid[i].answer = posGrid[i].possi[0];
@@ -243,14 +210,10 @@ let gridFunc = {
             }
 
         }
-        //console.log("gridsolve check 1");
-        //console.log(JSON.parse(JSON.stringify(posGrid)));
         //comparing each grid element to each other
-
         for (let j = 0; j < gridSize; j++) {
             if (newGrid[j].answer !== '') {
                 for (let k = 0; k < gridSize; k++) {
-
                     //reduces possibility array elements, comparing blocks in the same row/col/square
                     if (newGrid[j].col === newGrid[k].col || newGrid[j].row === newGrid[k].row || newGrid[j].square === newGrid[k].square) {
                         let index = posGrid[k].possi.indexOf(newGrid[j].answer);
@@ -265,10 +228,8 @@ let gridFunc = {
             }
             //checks to so see if its the only valid location of a number
             //If the number cant go anywhere else it will set it to that number
-
             let compArray = gridFunc.compArrayBuilder('col', newGrid[j].col, posGrid);
             //checking numbers 1-9
-
             if (newGrid[j].answer === '') {
                 for (let t = 1; t < 10; t++) {
                     let counter = 0;
@@ -276,7 +237,6 @@ let gridFunc = {
                         compArray.forEach(function (possiArray) {
                             if (possiArray.id !== newGrid[j].id && possiArray.possi.indexOf(t) === -1) {
                                 //Avoiding looking at current block for comparisons/makes sure the answer(t) isn't in a differnt spot in the column
-
                                 counter++;
                             }
                         })
@@ -291,10 +251,8 @@ let gridFunc = {
                     }
                 }
             }
-
             compArray = gridFunc.compArrayBuilder('row', newGrid[j].row, posGrid);
             //checking numbers 1-9
-
             if (newGrid[j].answer === '') {
                 for (let t = 1; t < 10; t++) {
                     let counter = 0;
@@ -320,7 +278,6 @@ let gridFunc = {
 
             compArray = gridFunc.compArrayBuilder('square', newGrid[j].square, posGrid);
             //checking numbers 1-9
-
             if (newGrid[j].answer === '') {
                 for (let t = 1; t < 10; t++) {
                     let counter = 0;
@@ -343,8 +300,6 @@ let gridFunc = {
             }
 
         }
-        console.log("post grid solve check");
-        console.log(JSON.parse(JSON.stringify(posGrid)));
         stateHelper(newGrid, posGrid);
         return posGrid;
     },
@@ -491,7 +446,6 @@ let gridFunc = {
                 }
             }
         } else if (posGrid[order[startID]].userInputted === true) {
-            console.log(order);
             returnGrid = this.recReduce(returnGrid, startID, order);
             return this.recSolve(returnGrid, startID + 1, order);
 
