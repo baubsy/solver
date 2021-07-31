@@ -4,6 +4,8 @@ input {
 	border-color: #686375;
 	text-align: center;
 	outline-width: 0px;
+	background-color: #DCD0F7;
+	font-size: 25px;
 }
 [id="0"], [id="1"],[id="2"],[id="3"],[id="4"],[id="5"],[id="6"],[id="7"],[id="8"],
 [id="27"],[id="28"],[id="29"],[id="30"],[id="31"],[id="32"],[id="33"],[id="34"],[id="35"],
@@ -36,7 +38,7 @@ input {
 	box-sizing: border-box;
 	width: fit-content;
 	padding: 30px;
-	padding-bottom: 20px;
+	padding-bottom: 10px;
 	border: 1px solid black;
 	border-radius: 12px;
 	background-color: #8569C2;
@@ -50,7 +52,8 @@ body{
 }
 button{
 	background-color: #DCD0F7;
-	padding: 11px;
+	padding: 8px;
 	border-radius: 8px;
 	margin: 5px;
+	font-size: 18px;
 }
