@@ -155,6 +155,10 @@ let gridFunc = {
                 order.push(d);
             }
         };
+        if(startID < 0){
+            console.log("start id possi error");
+            return grid;
+        }
         let newGrid = grid;
         for (let j = startID; j < 81; j++) {
             if (grid[order[j]].col === grid[id].col || grid[order[j]].row === grid[id].row || grid[order[j]].square === grid[id].square) {
@@ -170,6 +174,10 @@ let gridFunc = {
     //function to help reduce possibility arrays for the recSolve function. starts from order[startID] and moves down
     recReduce(posGrid, startID, order) {
         let newGrid = posGrid;
+        if(startID < 0){
+            console.log("start id error");
+            return newGrid;
+        }
         for (let i = 0; i < 81; i++) {
             if (newGrid[order[i]].answer !== undefined) {
                 newGrid = this.possiReduce(order[i], newGrid, newGrid[order[i]].answer, startID + 1, order);
@@ -315,9 +323,6 @@ let gridFunc = {
         //rebuilds possibility arrays in subsequent blocks after a back step changes things
         let newGrid = posGrid;
         for (let i = startID; i < 81; i++) {
-            if (order[i] === 70) {
-
-            }
             if (newGrid[order[i]].userInputted === false) {
                 newGrid[order[i]].possi.splice(0, newGrid[order[i]].possi.length);
                 for (let t = 1; t < 10; t++) {
@@ -332,6 +337,12 @@ let gridFunc = {
     doomCheck(posGrid, startID, order) {
         //checks if the current grid still has a valid solution
         let doom = false;
+        if (order === undefined) {
+            order = [];
+            for (let d = 0; d < 81; d++) {
+                order.push(d);
+            }
+        };
         if (startID > 81) {
             return doom;
         }
@@ -355,14 +366,17 @@ let gridFunc = {
         }
         return order;
     },
-    whileSolve(posGrid, startID, order) {
+    whileSolve(posGrid, startID, order, statusHelper) {
         let id = startID;
         let returnGrid = posGrid;
         let backstep = false;
-
+        console.log(JSON.parse(JSON.stringify(posGrid)));
+        console.log("while solve test");
         do {
             if (id < 0) {
                 console.log("backstepped too far");
+                statusHelper("Invalid Puzzle!");
+                break;
             }
             if (id === 80) {
                 if (returnGrid[order[id]].possi.length === 1) {

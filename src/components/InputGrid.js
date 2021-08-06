@@ -2,18 +2,21 @@ import React from 'react';
 import gridFunc from './gridFunc.js';
 
 class InputGrid extends React.Component {
-  state = { inputGrid: gridFunc.arrayBuilder('answer'), posArray: gridFunc.arrayBuilder() };
+  state = { inputGrid: gridFunc.arrayBuilder('answer'), posArray: gridFunc.arrayBuilder(), status: "Sudoku Solver!" };
 
   //function to solve grid as much as possible
   stateHelper = (inGrid, pGrid) => {
     this.setState({ inputGrid: inGrid, posArray: pGrid });
+  };
+  statusHelper = (status) => {
+    this.setState({ status: status });
   };
   debugClick = (event) => {
     let debugGrid = JSON.parse(JSON.stringify(this.state.posArray));
     console.log(debugGrid);
   };
   handleClear = () => {
-    this.setState({ inputGrid: gridFunc.arrayBuilder('answer'), posArray: gridFunc.arrayBuilder() });
+    this.setState({ inputGrid: gridFunc.arrayBuilder('answer'), posArray: gridFunc.arrayBuilder(), status: "Cleared!" });
   };
   handleChange = (event, id) => {
     event.persist();
@@ -37,24 +40,24 @@ class InputGrid extends React.Component {
     //console.log(event.keyCode);
     let posGrid = this.state.posArray;
     let newGrid = this.state.inputGrid;
-    if(event.keyCode === 8 || event.keyCode === 46){
+    if (event.keyCode === 8 || event.keyCode === 46) {
       posGrid[id].solved = 0;
       posGrid[id].userInputted = false;
       posGrid[id].answer = "";
       newGrid[id].answer = "";
       posGrid[id].possi.splice(0, posGrid[id].possi.length);
-      for(let i = 1; i < 10; i++){
+      for (let i = 1; i < 10; i++) {
         posGrid[id].possi.push(i);
       };
       this.setState({ posArray: posGrid, inputGrid: newGrid });
       //console.log(this.state.posArray);
     }
-    
+
   }
   rowBuilder = (startId) => {
     let row = [];
     for (let i = 0; i < 9; i++) {
-      row.push(<td><input id={startId + i} maxLength="1" onKeyDown={(e) => this.onKeyDown(e, startId + i)}onChange={(e) => { this.handleChange(e, startId + i) }} value={this.state.inputGrid[startId + i].answer} /></td>)
+      row.push(<td><input id={startId + i} maxLength="1" onKeyDown={(e) => this.onKeyDown(e, startId + i)} onChange={(e) => { this.handleChange(e, startId + i) }} value={this.state.inputGrid[startId + i].answer} /></td>)
     };
     return row;
   }
@@ -80,6 +83,9 @@ class InputGrid extends React.Component {
     console.log(reducedGrid);
   }
   recSolve2 = () => {
+    this.setState({ status: "Working on it..." });
+    this.setState({preSolve: JSON.parse(JSON.stringify(this.state.posArray))});
+    this.setState({preSolveInput: JSON.parse(JSON.stringify(this.state.inputGrid))});
     let reducedGrid = this.state.posArray;
     let inGrid = this.state.inputGrid;
 
@@ -100,13 +106,32 @@ class InputGrid extends React.Component {
     } while (sum !== newSum)
 
     let order = gridFunc.leastToMost(reducedGrid);
-    reducedGrid = gridFunc.whileSolve(reducedGrid, 0, order);
-    this.setState({ posArray: reducedGrid, inputGrid: reducedGrid });
+    /*
+    if(gridFunc.doomCheck(reducedGrid, 0, order)){
+      this.setState({status: "Invalid Puzzle"});
+    } else{
+      reducedGrid = gridFunc.whileSolve(reducedGrid, 0, order, this.statusHelper);
+      this.setState({ posArray: reducedGrid, inputGrid: reducedGrid, status: "Solved!" });
+    }
+    */
+   try {
+      reducedGrid = gridFunc.whileSolve(reducedGrid, 0, order, this.statusHelper);
+      this.setState({ posArray: reducedGrid, inputGrid: reducedGrid, status: "Solved!" });
+   } catch(err){
+     console.log("catch");
+     console.log(this.state.preSolve);
+     console.log(this.state.preSolveInput)
+     this.setState({status: "Invalid Puzzle"});
+     this.setState({posArray: this.state.preSolve, inputGrid: this.state.preSolveInput});
+   }
 
   }
   render() {
     return (
       <div>
+        <div id="status">
+          <h1>{this.state.status}</h1>
+        </div>
         <form autoComplete="off">
           <table id="inputTable" cellSpacing="0" cellPadding="0">
             <tbody>
